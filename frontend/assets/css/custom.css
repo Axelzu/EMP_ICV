@@ -1,0 +1,163 @@
+/*INDEX*/
+/* Colores y detalles corporativos */
+:root {
+    --primary-color: #0A2540; /* azul ICV */
+    --secondary-color: #00B4D8; /* azul claro */
+}
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #f4f6f8;
+}
+
+/* Contenedor de partículas */
+#particles-js {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: -1; /* Fondo detrás del contenido */
+    background: #f4f6f8;
+}
+
+/* Navbar personalizado */
+.navbar {
+    background-color: var(--primary-color) !important;
+}
+
+.btn-info {
+    background-color: var(--secondary-color) !important;
+    border-color: var(--secondary-color) !important;
+}
+
+.btn-info:hover {
+    background-color: #0096c7 !important;
+    border-color: #0096c7 !important;
+}
+
+/* Hero */
+.hero-text h1 {
+    color: var(--primary-color);
+}
+
+.hero-text p {
+    color: #333;
+}
+
+/* Footer */
+footer {
+    background-color: var(--primary-color);
+}
+
+
+
+/*LOGIN*/
+/* ===== LOGIN CARD ===== */
+.login-card {
+    width: 420px;              /* más grande */
+    padding: 35px;             /* más espacio interno */
+    background: rgba(255, 255, 255, 0.9); /* transparente elegante */
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    z-index: 2;
+}
+
+/* ===== TEXTOS DEL LOGIN ===== */
+.login-card h4 {
+    color: #000; /* Título negro */
+}
+
+.login-card label {
+    color: #000; /* Labels negros */
+    font-weight: 500;
+}
+
+/* ===== INPUTS ===== */
+.login-card input {
+    color: #000;
+    background-color: #fff;
+    border: 1px solid #ced4da;
+}
+
+/* Placeholder */
+.login-card input::placeholder {
+    color: #6c757d;
+}
+
+/* ===== BOTÓN ===== */
+.login-card button {
+    font-weight: 600;
+}
+
+/*PAGINA DE INCIO*/
+/* TARJETA BIENVENIDA */
+.welcome-card {
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+}
+
+/* TARJETA EMPRESA */
+.empresa-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+}
+
+.empresa-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+}
+
+
+/*PAGINA EMPRESA*/
+/* Card tabla */
+.table-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+}
+
+/* Tabla */
+.table th {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+/* Botones acciones */
+.btn-warning {
+    color: #000;
+}
+
+.btn-warning:hover {
+    background-color: #f1c40f;
+}
+
+.btn-danger:hover {
+    background-color: #c0392b;
+}
+
+
+/*CREATE Y EDIT*/ 
+.form-card {
+    width: 100%;
+    max-width: 700px !important;  /* MÁS GRANDE */
+    padding: 40px 45px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.92) !important;
+    backdrop-filter: blur(8px);
+}
+
+.form-card label {
+    color: #000;
+    font-weight: 600;
+}
+
+.form-card input {
+    padding: 12px;
+    font-size: 16px;
+}

@@ -19,12 +19,12 @@ if ($user = $result->fetch_assoc()) {
         $_SESSION['user_name'] = $user['nombre'];
         $_SESSION['user_email'] = $user['email'];
 
-        header("Location: /ICV/frontend/pages/inicio.php");
+        header("Location: frontend/pages/inicio.php");
         exit;
     }
 }
 
 // ❌ LOGIN INCORRECTO
 $_SESSION['login_error'] = "Usuario o contraseña incorrectos";
-header("Location: /ICV/frontend/pages/login.php");
+header("Location: /frontend/pages/login.php");
 exit;

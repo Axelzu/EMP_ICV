@@ -19,7 +19,7 @@ if ($user = $result->fetch_assoc()) {
         $_SESSION['user_name'] = $user['nombre'];
         $_SESSION['user_email'] = $user['email'];
 
-        header("Location: frontend/pages/inicio.php");
+        header("Location: /frontend/pages/inicio.php");
         exit;
     }
 }

@@ -4,6 +4,6 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 if (!isset($_SESSION['user_id'])) {
-    header("Location: /ICV/frontend/pages/login.php");
+    header("Location: /frontend/pages/login.php");
     exit;
 }

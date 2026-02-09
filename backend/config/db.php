@@ -7,5 +7,7 @@ $db   = "icvcom_icv_empresa";
 $conn = new mysqli($host, $user, $pass, $db);
 
 if ($conn->connect_error) {
-    die("Error de conexión");
+    die("Error de conexión DB: " . $conn->connect_error);
 }
+
+$conn->set_charset("utf8mb4");

@@ -9,6 +9,22 @@
 
     <!-- CSS propio -->
     <link rel="stylesheet" href="frontend/assets/css/custom.css">
+
+    <style>
+        /* Contenedor fijo para el carrusel con sombra y fondo transparente */
+        .hero-carousel {
+            height: 300px; /* Altura fija para que el footer no se mueva */
+            background: rgba(255, 255, 255, 0.05); /* Fondo semitransparente */
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .hero-carousel img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Ajusta la imagen al contenedor */
+        }
+    </style>
 </head>
 <body>
 
@@ -40,9 +56,29 @@
             </p>
         </div>
         <div class="col-md-6 text-center">
-            <img src="frontend/assets/images/foto.png" 
-                 class="img-fluid rounded shadow"
-                 alt="Empresa ICV">
+            <!-- CARRUSEL CON ESTILO -->
+            <div id="heroCarousel" class="carousel slide carousel-fade hero-carousel" data-bs-ride="carousel" data-bs-interval="5000">
+                <div class="carousel-inner">
+                    <div class="carousel-item active">
+                        <img src="frontend/assets/images/foto.png" alt="Imagen 1">
+                    </div>
+                    <div class="carousel-item">
+                        <img src="frontend/assets/images/foto2.png" alt="Imagen 2">
+                    </div>
+                    <div class="carousel-item">
+                        <img src="frontend/assets/images/foto3.png" alt="Imagen 3">
+                    </div>
+                </div>
+                <!-- Controles opcionales -->
+                <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Anterior</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Siguiente</span>
+                </button>
+            </div>
         </div>
     </div>
 </section>

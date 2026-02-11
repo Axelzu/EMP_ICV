@@ -11,18 +11,23 @@
     <link rel="stylesheet" href="frontend/assets/css/custom.css">
 
     <style>
-        /* Contenedor fijo para el carrusel con sombra y fondo transparente */
+        /* Contenedor para el carrusel con fondo transparente y sombra */
         .hero-carousel {
-            height: 300px; /* Altura fija para que el footer no se mueva */
-            background: rgba(255, 255, 255, 0.05); /* Fondo semitransparente */
+            background: rgba(255, 255, 255, 0.05); /* fondo semitransparente */
             border-radius: 15px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             overflow: hidden;
         }
+
         .hero-carousel img {
             width: 100%;
-            height: 100%;
-            object-fit: cover; /* Ajusta la imagen al contenedor */
+            height: auto; /* Mantener proporción */
+            display: block;
+        }
+
+        /* Opcional: limitar altura máxima */
+        .hero-carousel .carousel-inner {
+            max-height: 500px; /* Ajusta según tus imágenes */
         }
     </style>
 </head>
@@ -56,7 +61,7 @@
             </p>
         </div>
         <div class="col-md-6 text-center">
-            <!-- CARRUSEL CON ESTILO -->
+            <!-- CARRUSEL CON TRANSICIÓN FADE -->
             <div id="heroCarousel" class="carousel slide carousel-fade hero-carousel" data-bs-ride="carousel" data-bs-interval="5000">
                 <div class="carousel-inner">
                     <div class="carousel-item active">

@@ -1,14 +1,9 @@
 <?php
 require "../config/db.php";
 require "../config/excel.php";
-require "../../vendor/autoload.php";
-
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\IOFactory;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 /* ======================
-   1. DATOS
+   1. DATOS DEL FORMULARIO
 ====================== */
 $id         = $_POST['id'] ?? null;
 $empresa_id = $_POST['empresa_id'] ?? null;
@@ -17,11 +12,11 @@ $serie      = $_POST['numero_serie'] ?? null;
 $contador   = $_POST['contador_general'] ?? null;
 
 if (!$id || !$empresa_id) {
-    die("Empresa no seleccionada");
+    die("Datos incompletos");
 }
 
 /* ======================
-   2. ACTUALIZAR BD
+   2. ACTUALIZAR EN BD
 ====================== */
 $sql = "UPDATE impresoras_formulario
         SET marca_impresora = ?, numero_serie = ?, contador_general = ?
@@ -31,47 +26,53 @@ $stmt->bind_param("ssii", $marca, $serie, $contador, $id);
 $stmt->execute();
 
 /* ======================
-   3. RUTA EXCEL
+   3. CREAR/ACTUALIZAR EXCEL
 ====================== */
-$archivo = EXCEL_PATH . "empresa_{$empresa_id}_copiadora_{$id}.xlsx";
+$datos = [[
+    'ID Copiadora' => $id,
+    'Empresa'      => $empresa_id,
+    'Marca'        => $marca,
+    'Serie'        => $serie,
+    'Contador'     => $contador
+]];
+
+$nombreArchivo = "empresa_{$empresa_id}_copiadora_{$id}.xlsx";
+$rutaLocal = sys_get_temp_dir() . "/" . $nombreArchivo;
+
+generarExcel($datos, $nombreArchivo);
+$archivoGenerado = __DIR__ . '/../../excel_generados/' . $nombreArchivo;
 
 /* ======================
-   4. CARGAR O CREAR
+   4. ENVIAR A API INTERMEDIA
 ====================== */
-try {
-    // Intentar cargar
-    $spreadsheet = IOFactory::load($archivo);
-    $sheet = $spreadsheet->getActiveSheet();
+$api_url = 'https://api-intermedia.com/upload';
+$ch = curl_init($api_url);
 
-} catch (Exception $e) {
-    // Si NO existe → crear
-    $spreadsheet = new Spreadsheet();
-    $sheet = $spreadsheet->getActiveSheet();
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_POSTFIELDS, [
+    'file'  => new CURLFile($archivoGenerado),
+    'token' => 'TU_API_KEY_SECRETA'
+]);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
-    $sheet->fromArray(
-        ['ID', 'Empresa', 'Marca', 'Serie', 'Contador'],
-        NULL,
-        'A1'
-    );
+$response = curl_exec($ch);
+if (curl_errno($ch)) {
+    error_log('Error enviando Excel a API: ' . curl_error($ch));
+} else {
+    error_log('Excel enviado correctamente: ' . $response);
+}
+
+curl_close($ch);
+
+/* ======================
+   5. BORRAR TEMPORAL
+====================== */
+if (file_exists($archivoGenerado)) {
+    unlink($archivoGenerado);
 }
 
 /* ======================
-   5. ESCRIBIR DATOS
-====================== */
-$sheet->setCellValue('A2', $id);
-$sheet->setCellValue('B2', $empresa_id);
-$sheet->setCellValue('C2', $marca);
-$sheet->setCellValue('D2', $serie);
-$sheet->setCellValue('E2', $contador);
-
-/* ======================
-   6. GUARDAR
-====================== */
-$writer = new Xlsx($spreadsheet);
-$writer->save($archivo);
-
-/* ======================
-   7. REDIRECCIÓN
+   6. REDIRECCIONAR
 ====================== */
 header("Location: ../../frontend/pages/empresa.php?empresa_id=$empresa_id");
 exit;

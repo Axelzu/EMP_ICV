@@ -27,7 +27,7 @@ $stmt->execute();
 $id_impresora = $conn->insert_id;
 
 /* =========================
-   3. CREAR EXCEL CON excel.php
+   3. CREAR EXCEL
 ========================= */
 $datos = [[
     'ID Copiadora' => $id_impresora,
@@ -37,43 +37,13 @@ $datos = [[
     'Contador'     => $contador
 ]];
 
-$nombreArchivo = "empresa_{$empresa_id}_copiadora_{$id_impresora}.xlsx";
-$rutaLocal = sys_get_temp_dir() . "/" . $nombreArchivo;
+// Ruta pública en cPanel (carpeta exports dentro de public_html)
+$rutaPublica = $_SERVER['DOCUMENT_ROOT'] . "/exports/empresa_{$empresa_id}_copiadora_{$id_impresora}.xlsx";
 
-generarExcel($datos, $nombreArchivo); // Devuelve la ruta
-$archivoGenerado = __DIR__ . '/../../excel_generados/' . $nombreArchivo; // Ruta completa del excel.php
-
-/* =========================
-   4. ENVIAR A API INTERMEDIA
-========================= */
-$api_url = 'https://api-intermedia.com/upload'; // Cambia por tu URL real
-$ch = curl_init($api_url);
-
-curl_setopt($ch, CURLOPT_POST, true);
-curl_setopt($ch, CURLOPT_POSTFIELDS, [
-    'file'  => new CURLFile($archivoGenerado),
-    'token' => 'TU_API_KEY_SECRETA' // opcional para seguridad
-]);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-$response = curl_exec($ch);
-if (curl_errno($ch)) {
-    error_log('Error enviando Excel a API: ' . curl_error($ch));
-} else {
-    error_log('Excel enviado correctamente: ' . $response);
-}
-
-curl_close($ch);
+generarExcel($datos, $rutaPublica);
 
 /* =========================
-   5. BORRAR TEMPORAL
-========================= */
-if (file_exists($archivoGenerado)) {
-    unlink($archivoGenerado);
-}
-
-/* =========================
-   6. REDIRECCIONAR
+   4. REDIRECCIONAR
 ========================= */
 header("Location: ../../frontend/pages/empresa.php?empresa_id=$empresa_id");
 exit;

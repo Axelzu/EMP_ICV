@@ -4,21 +4,21 @@ require __DIR__ . '/../../vendor/autoload.php';
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
-function generarExcel($datos, $nombreArchivo = null)
+/**
+ * Genera un archivo Excel con los datos proporcionados
+ * y lo guarda en la ruta completa que se le pase.
+ *
+ * @param array $datos Array de datos a guardar (asociativo)
+ * @param string $rutaCompletaArchivo Ruta completa donde se guardará el Excel
+ * @return string Ruta del archivo generado
+ */
+function generarExcel($datos, $rutaCompletaArchivo)
 {
-    // Ruta donde se guardarán los excel
-    $ruta = __DIR__ . '/../../excel_generados/';
-
     // Crear carpeta si no existe
-    if (!file_exists($ruta)) {
-        mkdir($ruta, 0777, true);
+    $carpeta = dirname($rutaCompletaArchivo);
+    if (!file_exists($carpeta)) {
+        mkdir($carpeta, 0777, true);
     }
-
-    if (!$nombreArchivo) {
-        $nombreArchivo = "reporte_" . time() . ".xlsx";
-    }
-
-    $archivoCompleto = $ruta . $nombreArchivo;
 
     $spreadsheet = new Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
@@ -36,8 +36,8 @@ function generarExcel($datos, $nombreArchivo = null)
     }
 
     $writer = new Xlsx($spreadsheet);
-    $writer->save($archivoCompleto);
+    $writer->save($rutaCompletaArchivo);
 
-    return $archivoCompleto;
+    return $rutaCompletaArchivo;
 }
 ?>

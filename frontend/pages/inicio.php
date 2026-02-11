@@ -36,7 +36,7 @@ $empresas = $conn->query("SELECT * FROM empresas");
 <section class="container my-4">
     <div class="card shadow welcome-card">
         <div class="d-flex align-items-center">
-            <img src="../assets/images/foto.png" width="80" class="me-3 rounded-circle">
+            <img src="../assets/images/user.png" width="80" class="me-3 rounded-circle">
             <div>
                 <h5 class="mb-0">Bienvenido</h5>
                 <strong class="text-primary fs-5"><?= htmlspecialchars($usuario) ?></strong>
@@ -47,7 +47,7 @@ $empresas = $conn->query("SELECT * FROM empresas");
 
 <!-- LISTADO DE EMPRESAS -->
 <section class="container flex-grow-1">
-    <h4 class="mb-4 text-primary fw-bold">Empresas</h4>
+    <h4 class="mb-4 text-primary fw-bold">Clientes</h4>
 
     <div class="row g-3">
         <?php while ($empresa = $empresas->fetch_assoc()): ?>

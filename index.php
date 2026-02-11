@@ -40,29 +40,9 @@
             </p>
         </div>
         <div class="col-md-6 text-center">
-            <!-- CARRUSEL AUTOMÁTICO -->
-            <div id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="5000">
-                <div class="carousel-inner">
-                    <div class="carousel-item active">
-                        <img src="frontend/assets/images/foto.png" class="d-block w-100 rounded shadow" alt="Imagen 1">
-                    </div>
-                    <div class="carousel-item">
-                        <img src="frontend/assets/images/foto2.png" class="d-block w-100 rounded shadow" alt="Imagen 2">
-                    </div>
-                    <div class="carousel-item">
-                        <img src="frontend/assets/images/foto3.png" class="d-block w-100 rounded shadow" alt="Imagen 3">
-                    </div>
-                </div>
-                <!-- Controles opcionales -->
-                <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
-                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Anterior</span>
-                </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
-                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Siguiente</span>
-                </button>
-            </div>
+            <img src="frontend/assets/images/foto.png" 
+                 class="img-fluid rounded shadow"
+                 alt="Empresa ICV">
         </div>
     </div>
 </section>

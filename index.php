@@ -9,27 +9,6 @@
 
     <!-- CSS propio -->
     <link rel="stylesheet" href="frontend/assets/css/custom.css">
-
-    <style>
-        /* Contenedor para el carrusel con fondo transparente y sombra */
-        .hero-carousel {
-            background: rgba(255, 255, 255, 0.05); /* fondo semitransparente */
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            overflow: hidden;
-        }
-
-        .hero-carousel img {
-            width: 100%;
-            height: auto; /* Mantener proporción */
-            display: block;
-        }
-
-        /* Opcional: limitar altura máxima */
-        .hero-carousel .carousel-inner {
-            max-height: 500px; /* Ajusta según tus imágenes */
-        }
-    </style>
 </head>
 <body>
 
@@ -61,29 +40,9 @@
             </p>
         </div>
         <div class="col-md-6 text-center">
-            <!-- CARRUSEL CON TRANSICIÓN FADE -->
-            <div id="heroCarousel" class="carousel slide carousel-fade hero-carousel" data-bs-ride="carousel" data-bs-interval="5000">
-                <div class="carousel-inner">
-                    <div class="carousel-item active">
-                        <img src="frontend/assets/images/foto.png" alt="Imagen 1">
-                    </div>
-                    <div class="carousel-item">
-                        <img src="frontend/assets/images/foto2.png" alt="Imagen 2">
-                    </div>
-                    <div class="carousel-item">
-                        <img src="frontend/assets/images/foto3.png" alt="Imagen 3">
-                    </div>
-                </div>
-                <!-- Controles opcionales -->
-                <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
-                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Anterior</span>
-                </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
-                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Siguiente</span>
-                </button>
-            </div>
+            <img src="frontend/assets/images/foto.png" 
+                 class="img-fluid rounded shadow"
+                 alt="Empresa ICV">
         </div>
     </div>
 </section>

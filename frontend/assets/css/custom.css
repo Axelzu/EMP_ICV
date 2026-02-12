@@ -14,11 +14,12 @@ body {
 #particles-js {
     position: fixed;
     width: 100%;
-    height: 100%;
+    height: 100vh;
     top: 0;
     left: 0;
     z-index: -1; /* Fondo detrás del contenido */
     background: #f4f6f8;
+    pointer-events: none;
 }
 
 /* Navbar personalizado */
@@ -49,39 +50,27 @@ body {
 footer {
     background-color: var(--primary-color);
 }
-/* Altura fija del carrusel */
+/* ===== CARRUSEL ESTABLE ===== */
+
 #carouselICV {
     height: 400px;
+    overflow: hidden;
 }
 
-/* Todas las imágenes ocupan el mismo espacio */
+#carouselICV .carousel-inner,
 #carouselICV .carousel-item {
-    height: 400px;
+    height: 100%;
 }
 
 #carouselICV .carousel-item img {
-    height: 100%;
     width: 100%;
+    height: 100%;
     object-fit: cover;
 }
 
-/* Asegura transición fade correcta */
+/* Fade más visible */
 .carousel-fade .carousel-item {
-    opacity: 0;
-    transition: opacity .8s ease-in-out;
-}
-
-.carousel-fade .carousel-item.active {
-    opacity: 1;
-}
-body {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-}
-
-section.container {
-    flex: 1;
+    transition: opacity 1s ease-in-out;
 }
 
 

@@ -2,5 +2,5 @@
 session_start();
 session_destroy();
 
-header("Location: /ICV/index.php");
+header("Location: ../../frontend/index.php");
 exit;

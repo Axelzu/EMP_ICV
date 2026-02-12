@@ -53,7 +53,7 @@ if (!$empresa) {
     <!-- TÍTULO -->
     <div class="text-center mb-4">
         <h2 class="fw-bold text-primary">
-            Copiadoras – <?= htmlspecialchars($empresa['nombre']) ?>
+            COPIADORAS – <?= strtoupper(htmlspecialchars($empresa['nombre'])) ?>
         </h2>
         <p class="text-muted">
             Gestión de impresoras registradas

@@ -55,7 +55,7 @@ $empresas = $conn->query("SELECT * FROM empresas");
                 <a href="empresa.php?empresa_id=<?= $empresa['id'] ?>" class="text-decoration-none">
                     <div class="card shadow empresa-card h-100">
                         <div class="card-body d-flex align-items-center">
-                            <img src="../assets/images/empresa.png"
+                            <img src="../assets/images/foto.png"
                                  width="60"
                                  class="me-3">
                             <h6 class="mb-0 text-dark">

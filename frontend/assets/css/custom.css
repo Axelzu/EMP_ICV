@@ -49,6 +49,11 @@ body {
 footer {
     background-color: var(--primary-color);
 }
+.carousel-item img {
+    height: 400px;
+    object-fit: cover;
+    border-radius: 10px;
+}
 
 
 

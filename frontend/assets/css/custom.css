@@ -52,7 +52,7 @@ footer {
 /* ===== HERO CARD CUADRO TRANSPARENTE ===== */
 .hero-card {
     /* Cambiamos de 0.85 a 0.95 para que sea menos transparente */
-    background: rgba(255, 255, 255, 0.75); 
+    background: rgba(255, 255, 255, 0.40); 
     padding: 20px;
     border-radius: 15px;
     max-width: 500px;

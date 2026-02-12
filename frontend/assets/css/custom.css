@@ -49,27 +49,19 @@ footer {
     align-items: center;
 }
 
-/* ===== HERO CARD TIPO VIDRIO (Glassmorphism) ===== */
+/* ===== HERO CARD CUADRO TRANSPARENTE ===== */
 .hero-card {
-    /* El 0.4 es el nivel de transparencia (ajusta entre 0.1 y 0.9) */
-    background: rgba(255, 255, 255, 0.4); 
-    
-    /* Este es el truco para que lo de atrás se vea borroso y elegante */
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    
+    /* Cambiamos de 0.85 a 0.95 para que sea menos transparente */
+    background: rgba(255, 255, 255, 0.95); 
     padding: 20px;
-    border-radius: 20px;
+    border-radius: 15px;
     max-width: 500px;
     margin: auto;
-    
-    /* Sombra suave para dar profundidad */
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    
-    /* Evita que las imágenes se salgan de las esquinas */
+    box-shadow: 0px 10px 25px rgba(0,0,0,0.15);
+    /* Esto evita que las imágenes se salgan de los bordes redondeados */
     overflow: hidden; 
 }
+
 /* ===== CARRUSEL ===== */
 #carouselICV {
     height: 350px; /* Cambiado a height fijo para consistencia */
@@ -86,12 +78,13 @@ footer {
     height: 100%;
 }
 
-/* ===== AJUSTE DE IMÁGENES PARA QUE NO SE VEAN MAL ===== */
 #carouselICV .carousel-item img.carousel-img {
     width: 100%;
-    height: 300px; /* Altura fija para que el cuadro no salte */
-    object-fit: contain; /* Esto centra la imagen y evita que se corte o estire */
-    padding: 10px;
+    height: 100%;
+    /* 'contain' es bueno, pero si quieres que llene el cuadro usa 'cover' 
+       o ajusta el contenedor para que no se vea aire */
+    object-fit: contain; 
+    border-radius: 10px;
 }
 
 /* Transición fade más suave */

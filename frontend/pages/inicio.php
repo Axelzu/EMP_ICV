@@ -5,6 +5,15 @@ require "../../backend/config/db.php";
 
 $usuario = $_SESSION['user_name'];
 $empresas = $conn->query("SELECT * FROM empresas");
+
+// Arreglo con logos por ID de empresa
+$logos = [
+    1 => 'h_vozandes.png',
+    2 => 'empresa2.png',
+    3 => 'empresa3.png',
+    4 => 'empresa4.png',
+    5 => 'empresa5.png'
+];
 ?>
 
 <!DOCTYPE html>
@@ -51,13 +60,15 @@ $empresas = $conn->query("SELECT * FROM empresas");
 
     <div class="row g-3">
         <?php while ($empresa = $empresas->fetch_assoc()): ?>
+            <?php 
+            // Determinar qué logo usar
+            $logo = $logos[$empresa['id']] ?? 'empresa.png';
+            ?>
             <div class="col-md-6 col-lg-4">
                 <a href="empresa.php?empresa_id=<?= $empresa['id'] ?>" class="text-decoration-none">
                     <div class="card shadow empresa-card h-100">
                         <div class="card-body d-flex align-items-center">
-                            <img src="../assets/images/foto.png"
-                                 width="60"
-                                 class="me-3">
+                            <img src="../assets/images/<?= $logo ?>" width="60" class="me-3 rounded-circle">
                             <h6 class="mb-0 text-dark">
                                 <?= htmlspecialchars($empresa['nombre']) ?>
                             </h6>

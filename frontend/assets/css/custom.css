@@ -51,20 +51,29 @@ footer {
 
 /* ===== HERO CARD CUADRO TRANSPARENTE ===== */
 .hero-card {
-    background: rgba(255, 255, 255, 0.85);
-    padding: 15px;
+    /* Cambiamos de 0.85 a 0.95 para que sea menos transparente */
+    background: rgba(255, 255, 255, 0.95); 
+    padding: 20px;
     border-radius: 15px;
     max-width: 500px;
     margin: auto;
     box-shadow: 0px 10px 25px rgba(0,0,0,0.15);
+    /* Esto evita que las imágenes se salgan de los bordes redondeados */
+    overflow: hidden; 
 }
 
 /* ===== CARRUSEL ===== */
 #carouselICV {
-    max-height: 350px;        /* altura fija para que no cambie el footer */
+    height: 350px; /* Cambiado a height fijo para consistencia */
+    display: flex;
+    align-items: center; /* Centra la imagen verticalmente si es pequeña */
+    justify-content: center;
 }
 
-#carouselICV .carousel-inner,
+#carouselICV .carousel-inner {
+    height: 100%;
+}
+
 #carouselICV .carousel-item {
     height: 100%;
 }
@@ -72,7 +81,9 @@ footer {
 #carouselICV .carousel-item img.carousel-img {
     width: 100%;
     height: 100%;
-    object-fit: contain;      /* manteniendo proporción sin recortar */
+    /* 'contain' es bueno, pero si quieres que llene el cuadro usa 'cover' 
+       o ajusta el contenedor para que no se vea aire */
+    object-fit: contain; 
     border-radius: 10px;
 }
 

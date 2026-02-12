@@ -4,18 +4,22 @@
     <meta charset="UTF-8">
     <title>ICV - Inicio</title>
 
-    <!-- BOOTSTRAP -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- CSS propio -->
     <link rel="stylesheet" href="frontend/assets/css/custom.css">
+
+    <style>
+        /* Ajuste rápido para que las flechas del carrusel se vean sobre fondo blanco */
+        .carousel-control-prev-icon,
+        .carousel-control-next-icon {
+            filter: invert(1) grayscale(100) brightness(0.5);
+        }
+    </style>
 </head>
 <body>
 
-<!-- CONTENEDOR DE PARTICULAS -->
 <div id="particles-js"></div>
 
-<!-- NAVBAR -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
     <a class="navbar-brand d-flex align-items-center" href="#">
         <img src="frontend/assets/images/foto.png" width="40" class="me-2" alt="ICV Logo">
@@ -29,10 +33,8 @@
     </div>
 </nav>
 
-<!-- HERO -->
 <section class="container my-5 hero-section">
     <div class="row align-items-center">
-        <!-- TEXTO -->
         <div class="col-md-6 hero-text">
             <h1 class="fw-bold text-primary">Innovación y Confianza</h1>
             <p class="lead">
@@ -41,7 +43,6 @@
             </p>
         </div>
 
-        <!-- CARRUSEL EN CUADRO TRANSPARENTE -->
         <div class="col-md-6 text-center">
             <div class="hero-card shadow rounded">
                 <div id="carouselICV" 
@@ -49,14 +50,12 @@
                      data-bs-ride="carousel"
                      data-bs-interval="5000">
 
-                    <!-- Indicadores -->
                     <div class="carousel-indicators">
                         <button type="button" data-bs-target="#carouselICV" data-bs-slide-to="0" class="active"></button>
                         <button type="button" data-bs-target="#carouselICV" data-bs-slide-to="1"></button>
                         <button type="button" data-bs-target="#carouselICV" data-bs-slide-to="2"></button>
                     </div>
 
-                    <!-- Imágenes -->
                     <div class="carousel-inner rounded">
 
                         <div class="carousel-item active">
@@ -79,35 +78,26 @@
 
                     </div>
 
-                </div>
-            </div>
-        </div>
+                    <button class="carousel-control-prev" 
+                            type="button" 
+                            data-bs-target="#carouselICV" 
+                            data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Anterior</span>
+                    </button>
 
-    </div>
-        <!-- Flecha anterior -->
-        <button class="carousel-control-prev" 
-                type="button" 
-                data-bs-target="#carouselICV" 
-                data-bs-slide="prev">
-            <span class="carousel-control-prev-icon"></span>
-        </button>
+                    <button class="carousel-control-next" 
+                            type="button" 
+                            data-bs-target="#carouselICV" 
+                            data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Siguiente</span>
+                    </button>
 
-        <!-- Flecha siguiente -->
-        <button class="carousel-control-next" 
-                type="button" 
-                data-bs-target="#carouselICV" 
-                data-bs-slide="next">
-            <span class="carousel-control-next-icon"></span>
-        </button>
-
-    </div>
-
-</div>
-
+                </div> </div> </div>
     </div>
 </section>
 
-<!-- FOOTER -->
 <footer class="bg-dark text-white text-center py-4">
     <p class="mb-1"><strong>ICV S.A.</strong></p>
     <p class="mb-1">Soluciones Tecnológicas</p>
@@ -116,7 +106,6 @@
     <small>© 2026 ICV - Todos los derechos reservados</small>
 </footer>
 
-<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
 

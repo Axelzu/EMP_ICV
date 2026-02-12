@@ -32,6 +32,7 @@
 <!-- HERO -->
 <section class="container my-5 hero-section">
     <div class="row align-items-center">
+        <!-- TEXTO -->
         <div class="col-md-6 hero-text">
             <h1 class="fw-bold text-primary">Innovación y Confianza</h1>
             <p class="lead">
@@ -39,65 +40,52 @@
                 y eficientes para la gestión empresarial.
             </p>
         </div>
-        <div class="col-md-6">
 
-    <div id="carouselICV" 
-         class="carousel slide carousel-fade shadow rounded" 
-         data-bs-ride="carousel"
-         data-bs-interval="4000">
+        <!-- CARRUSEL EN CUADRO TRANSPARENTE -->
+        <div class="col-md-6 text-center">
+            <div class="hero-card shadow rounded">
+                <div id="carouselICV" 
+                     class="carousel slide carousel-fade" 
+                     data-bs-ride="carousel"
+                     data-bs-interval="5000">
 
-        <!-- Indicadores -->
-        <div class="carousel-indicators">
-            <button type="button" data-bs-target="#carouselICV" data-bs-slide-to="0" class="active"></button>
-            <button type="button" data-bs-target="#carouselICV" data-bs-slide-to="1"></button>
-            <button type="button" data-bs-target="#carouselICV" data-bs-slide-to="2"></button>
+                    <!-- Indicadores -->
+                    <div class="carousel-indicators">
+                        <button type="button" data-bs-target="#carouselICV" data-bs-slide-to="0" class="active"></button>
+                        <button type="button" data-bs-target="#carouselICV" data-bs-slide-to="1"></button>
+                        <button type="button" data-bs-target="#carouselICV" data-bs-slide-to="2"></button>
+                    </div>
+
+                    <!-- Imágenes -->
+                    <div class="carousel-inner rounded">
+
+                        <div class="carousel-item active">
+                            <img src="frontend/assets/images/foto.png" 
+                                 class="carousel-img"
+                                 alt="Imagen 1">
+                        </div>
+
+                        <div class="carousel-item">
+                            <img src="frontend/assets/images/foto2.png" 
+                                 class="carousel-img"
+                                 alt="Imagen 2">
+                        </div>
+
+                        <div class="carousel-item">
+                            <img src="frontend/assets/images/foto3.png" 
+                                 class="carousel-img"
+                                 alt="Imagen 3">
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
         </div>
-
-        <!-- Imágenes -->
-        <div class="carousel-inner rounded">
-
-            <div class="carousel-item active">
-                <img src="frontend/assets/images/foto.png" 
-                     class="d-block w-100"
-                     alt="Imagen 1">
-            </div>
-
-            <div class="carousel-item">
-                <img src="frontend/assets/images/foto2.png" 
-                     class="d-block w-100"
-                     alt="Imagen 2">
-            </div>
-
-            <div class="carousel-item">
-                <img src="frontend/assets/images/foto3.png" 
-                     class="d-block w-100"
-                     alt="Imagen 3">
-            </div>
-
-        </div>
-
-        <!-- Flecha anterior -->
-        <button class="carousel-control-prev" 
-                type="button" 
-                data-bs-target="#carouselICV" 
-                data-bs-slide="prev">
-            <span class="carousel-control-prev-icon"></span>
-        </button>
-
-        <!-- Flecha siguiente -->
-        <button class="carousel-control-next" 
-                type="button" 
-                data-bs-target="#carouselICV" 
-                data-bs-slide="next">
-            <span class="carousel-control-next-icon"></span>
-        </button>
-
-    </div>
-
-</div>
 
     </div>
 </section>
+
 
 <!-- FOOTER -->
 <footer class="bg-dark text-white text-center py-4">

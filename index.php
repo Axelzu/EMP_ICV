@@ -57,7 +57,7 @@
         <div class="carousel-inner rounded">
 
             <div class="carousel-item active">
-                <img src="frontend/assets/images/foto1.png" 
+                <img src="frontend/assets/images/foto.png" 
                      class="d-block w-100"
                      alt="Imagen 1">
             </div>

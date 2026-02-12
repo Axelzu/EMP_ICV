@@ -32,18 +32,50 @@
 <!-- HERO -->
 <section class="container my-5">
     <div class="row align-items-center">
+        
+        <!-- TEXTO -->
         <div class="col-md-6 hero-text">
-            <h1 class="fw-bold text-primary">Innovación y Confianza</h1>
+            <h1 class="fw-bold">Innovación y Confianza</h1>
             <p class="lead">
                 En ICV brindamos soluciones tecnológicas modernas, seguras
                 y eficientes para la gestión empresarial.
             </p>
         </div>
+
+        <!-- CARRUSEL -->
         <div class="col-md-6 text-center">
-            <img src="frontend/assets/images/foto.png" 
-                 class="img-fluid rounded shadow"
-                 alt="Empresa ICV">
+            <div class="hero-card">
+                <div id="heroCarousel" 
+                     class="carousel slide carousel-fade" 
+                     data-bs-ride="carousel" 
+                     data-bs-interval="5000">
+
+                    <div class="carousel-inner">
+                        
+                        <div class="carousel-item active">
+                            <img src="frontend/assets/images/foto.png" 
+                                 class="carousel-img" 
+                                 alt="Imagen 1">
+                        </div>
+
+                        <div class="carousel-item">
+                            <img src="frontend/assets/images/foto2.png" 
+                                 class="carousel-img" 
+                                 alt="Imagen 2">
+                        </div>
+
+                        <div class="carousel-item">
+                            <img src="frontend/assets/images/foto3.png" 
+                                 class="carousel-img" 
+                                 alt="Imagen 3">
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
         </div>
+
     </div>
 </section>
 
@@ -69,8 +101,19 @@ particlesJS("particles-js", {
     "shape": { "type": "circle" },
     "opacity": { "value": 0.5 },
     "size": { "value": 3 },
-    "line_linked": { "enable": true, "distance": 150, "color": "#0A2540", "opacity": 0.4, "width": 1 },
-    "move": { "enable": true, "speed": 3, "direction": "none", "out_mode": "out" }
+    "line_linked": { 
+        "enable": true, 
+        "distance": 150, 
+        "color": "#0A2540", 
+        "opacity": 0.4, 
+        "width": 1 
+    },
+    "move": { 
+        "enable": true, 
+        "speed": 3, 
+        "direction": "none", 
+        "out_mode": "out" 
+    }
   },
   "interactivity": {
     "events": {

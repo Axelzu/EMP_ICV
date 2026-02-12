@@ -84,8 +84,28 @@
         </div>
 
     </div>
-</section>
+        <!-- Flecha anterior -->
+        <button class="carousel-control-prev" 
+                type="button" 
+                data-bs-target="#carouselICV" 
+                data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+        </button>
 
+        <!-- Flecha siguiente -->
+        <button class="carousel-control-next" 
+                type="button" 
+                data-bs-target="#carouselICV" 
+                data-bs-slide="next">
+            <span class="carousel-control-next-icon"></span>
+        </button>
+
+    </div>
+
+</div>
+
+    </div>
+</section>
 
 <!-- FOOTER -->
 <footer class="bg-dark text-white text-center py-4">

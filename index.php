@@ -30,7 +30,7 @@
 </nav>
 
 <!-- HERO -->
-<section class="container my-5">
+<section class="container my-5 hero-section">
     <div class="row align-items-center">
         <div class="col-md-6 hero-text">
             <h1 class="fw-bold text-primary">Innovación y Confianza</h1>

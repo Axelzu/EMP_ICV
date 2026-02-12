@@ -70,7 +70,7 @@ $logos = [
                         <div class="card-body d-flex align-items-center">
                             <img src="../assets/images/<?= $logo ?>" width="60" class="me-3 rounded-circle">
                             <h6 class="mb-0 text-dark">
-                                <?= htmlspecialchars($empresa['nombre']) ?>
+                                <?= strtoupper(htmlspecialchars($empresa['nombre'])) ?>
                             </h6>
                         </div>
                     </div>

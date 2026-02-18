@@ -10,7 +10,7 @@ $empresas = $conn->query("SELECT * FROM empresas");
 $logos = [
     1 => 'h_vozandes.png',
     2 => 'c_internacional.png',
-    3 => 'empresa3.png',
+    3 => 'c_cruzmedic.png',
     4 => 'empresa4.png',
     5 => 'empresa5.png'
 ];

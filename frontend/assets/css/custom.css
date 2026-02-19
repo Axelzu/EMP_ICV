@@ -202,3 +202,74 @@ footer {
     padding: 12px;
     font-size: 16px;
 }
+
+
+/* =============================================
+   ESTILOS RESPONSIVE (MÓVILES)
+   ============================================= */
+
+@media (max-width: 768px) {
+    
+    /* Global */
+    body {
+        font-size: 14px;
+    }
+
+    /* INDEX - HERO SECTION */
+    .hero-section {
+        min-height: auto;
+        padding: 40px 10px;
+    }
+    
+    .hero-card {
+        max-width: 100%;
+        padding: 15px;
+    }
+
+    #carouselICV {
+        height: 250px; /* Reducimos altura en móvil */
+    }
+
+    /* LOGIN */
+    .login-card {
+        width: 90% !important; /* En lugar de 420px fixed */
+        max-width: 400px;
+        padding: 25px 20px;
+    }
+
+    /* PAGINA DE INICIO (Tarjetas de Empresa) */
+    .container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    /* PAGINA EMPRESA (Tablas Responsive) */
+    /* Este truco hace que la tabla se pueda deslizar de lado si es muy ancha */
+    .table-card {
+        overflow-x: auto;
+        padding: 10px;
+    }
+
+    .table th, .table td {
+        white-space: nowrap; /* Evita que el texto se amontone */
+    }
+
+    /* CREATE Y EDIT (Formularios) */
+    .form-card {
+        width: 95% !important;
+        padding: 25px 20px !important;
+        margin: 20px auto;
+        border-radius: 12px;
+    }
+
+    .form-card h2 {
+        font-size: 1.5rem;
+    }
+
+    /* Ajuste de botones para que sean fáciles de tocar con el pulgar */
+    .btn {
+        width: 100%; /* Botones a ancho completo en móvil */
+        margin-bottom: 10px;
+        padding: 12px;
+    }
+}

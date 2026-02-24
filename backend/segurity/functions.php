@@ -1,10 +1,9 @@
 <?php
-// Iniciar sesión si no está activa
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Función para generar el Token (DEBE LLAMARSE EXACTAMENTE ASÍ)
+// Generar el Token
 function generarTokenCSRF() {
     if (empty($_SESSION['csrf_token'])) {
         $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -12,17 +11,17 @@ function generarTokenCSRF() {
     return $_SESSION['csrf_token'];
 }
 
-// Función para limpiar datos
+// Limpiar datos
 function sanear($dato) {
     return htmlspecialchars(trim($dato), ENT_QUOTES, 'UTF-8');
 }
 
-// Función para validar el Token
+// Validar el Token
 function validarTokenCSRF($token) {
     return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
 }
 
-// Función para registros (Logs)
+// Registrar movimientos
 function registrarLog($conn, $accion, $detalle) {
     $user_id = $_SESSION['user_id'] ?? 0;
     $ip = $_SERVER['REMOTE_ADDR'];

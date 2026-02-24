@@ -1,8 +1,8 @@
 <?php
 require "../config/db.php";
 require "../auth/guard.php";
-// --- NUEVO: CARGAR APARTADO DE SEGURIDAD ---
-require '../security/functions.php'; 
+// Usamos la ruta absoluta para evitar fallos en cPanel
+require_once $_SERVER['DOCUMENT_ROOT'] . '/backend/security/functions.php'; 
 
 $id = $_GET['id'] ?? null;
 
@@ -30,10 +30,34 @@ $empresa_id = $copiadora['empresa_id'];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar Copiadora</title>
+    <title>Editar Copiadora | ICV</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../../frontend/assets/css/custom.css">
+    
+    <style>
+        /* CONFIGURACIÓN DE PARTÍCULAS IGUAL A CREATE.PHP */
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background-color: #f8f9fa; /* Fondo gris claro profesional */
+            z-index: -1;
+            top: 0;
+            left: 0;
+        }
+        .form-card {
+            z-index: 10;
+            background-color: rgba(255, 255, 255, 0.95) !important;
+            border-radius: 15px;
+            padding: 20px;
+            width: 400px;
+        }
+        .navbar, footer {
+            background-color: #0A2540;
+            z-index: 20;
+        }
+    </style>
 </head>
 
 <body class="d-flex flex-column min-vh-100">
@@ -43,7 +67,7 @@ $empresa_id = $copiadora['empresa_id'];
 <nav class="navbar navbar-dark px-4">
     <a class="navbar-brand d-flex align-items-center" href="../../frontend/pages/inicio.php">
         <img src="../../frontend/assets/images/foto.png" width="40" class="me-2">
-        ICV
+        ICV - Gestión
     </a>
 </nav>
 
@@ -59,7 +83,7 @@ $empresa_id = $copiadora['empresa_id'];
             <input type="hidden" name="empresa_id" value="<?= $empresa_id ?>">
 
             <div class="mb-3">
-                <label class="form-label">Marca</label>
+                <label class="form-label fw-bold">Marca</label>
                 <input type="text" name="marca_impresora" 
                        class="form-control" 
                        value="<?= htmlspecialchars($copiadora['marca_impresora']) ?>" 
@@ -67,7 +91,7 @@ $empresa_id = $copiadora['empresa_id'];
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Número de serie</label>
+                <label class="form-label fw-bold">Número de serie</label>
                 <input type="text" name="numero_serie" 
                        class="form-control" 
                        value="<?= htmlspecialchars($copiadora['numero_serie']) ?>" 
@@ -75,7 +99,7 @@ $empresa_id = $copiadora['empresa_id'];
             </div>
 
             <div class="mb-4">
-                <label class="form-label">Contador general</label>
+                <label class="form-label fw-bold">Contador general</label>
                 <input type="number" name="contador_general" 
                        class="form-control" 
                        value="<?= $copiadora['contador_general'] ?>" 
@@ -86,22 +110,40 @@ $empresa_id = $copiadora['empresa_id'];
                 <a href="../../frontend/pages/empresa.php?empresa_id=<?= $empresa_id ?>" 
                    class="btn btn-secondary">⬅ Volver</a>
 
-                <button class="btn btn-info text-white">💾 Actualizar</button>
+                <button type="submit" class="btn btn-info text-white shadow-sm">💾 Actualizar</button>
             </div>
         </form>
 
     </div>
 </main>
 
-<footer class="text-white text-center py-3">
-    <small>© 2026 ICV</small>
+<footer class="text-white text-center py-3 mt-auto">
+    <small>© 2026 ICV - Todos los derechos reservados</small>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
 <script>
-particlesJS("particles-js", {
-  particles: { number: { value: 60 }, size: { value: 3 }, move: { speed: 2 } }
-});
+    particlesJS("particles-js", {
+        "particles": {
+            "number": { "value": 80, "density": { "enable": true, "value_area": 800 } },
+            "color": { "value": "#0A2540" }, /* Color azul ICV */
+            "shape": { "type": "circle" },
+            "opacity": { "value": 0.5 },
+            "size": { "value": 3 },
+            "line_linked": { 
+                "enable": true, 
+                "distance": 150, 
+                "color": "#0A2540", 
+                "opacity": 0.4, 
+                "width": 1 
+            },
+            "move": { "enable": true, "speed": 3 }
+        },
+        "interactivity": {
+            "events": { "onhover": { "enable": true, "mode": "grab" } }
+        },
+        "retina_detect": true
+    });
 </script>
 
 </body>

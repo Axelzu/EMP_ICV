@@ -1,9 +1,12 @@
 <?php
+// Iniciar sesión para que los Tokens funcionen
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Generar el Token
+/**
+ * Genera un token aleatorio para el formulario
+ */
 function generarTokenCSRF() {
     if (empty($_SESSION['csrf_token'])) {
         $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -11,17 +14,23 @@ function generarTokenCSRF() {
     return $_SESSION['csrf_token'];
 }
 
-// Limpiar datos
-function sanear($dato) {
-    return htmlspecialchars(trim($dato), ENT_QUOTES, 'UTF-8');
-}
-
-// Validar el Token
+/**
+ * Valida que el token enviado sea el correcto
+ */
 function validarTokenCSRF($token) {
     return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
 }
 
-// Registrar movimientos
+/**
+ * Limpia los textos para evitar inyecciones maliciosas (XSS)
+ */
+function sanear($dato) {
+    return htmlspecialchars(trim($dato), ENT_QUOTES, 'UTF-8');
+}
+
+/**
+ * Registra quién hizo qué en la base de datos
+ */
 function registrarLog($conn, $accion, $detalle) {
     $user_id = $_SESSION['user_id'] ?? 0;
     $ip = $_SERVER['REMOTE_ADDR'];

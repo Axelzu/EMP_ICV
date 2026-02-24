@@ -1,6 +1,8 @@
 <?php
 require '../config/db.php';
 require '../auth/guard.php';
+// --- NUEVO: CARGAR APARTADO DE SEGURIDAD ---
+require '../security/functions.php'; 
 
 $empresa_id = $_GET['empresa_id'] ?? null;
 if (!$empresa_id) {
@@ -15,19 +17,15 @@ if (!$empresa_id) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registrar Copiadora</title>
 
-    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- CSS -->
     <link rel="stylesheet" href="../../frontend/assets/css/custom.css">
 </head>
 
 <body class="d-flex flex-column min-vh-100">
 
-<!-- PARTICULAS -->
 <div id="particles-js"></div>
 
-<!-- NAVBAR -->
 <nav class="navbar navbar-dark px-4">
     <a class="navbar-brand d-flex align-items-center" href="../../frontend/pages/inicio.php">
         <img src="../../frontend/assets/images/foto.png" width="40" class="me-2">
@@ -35,7 +33,6 @@ if (!$empresa_id) {
     </a>
 </nav>
 
-<!-- CONTENIDO -->
 <main class="flex-grow-1 d-flex align-items-center justify-content-center">
 
     <div class="card shadow form-card" style="width: 400px; background-color: rgba(255,255,255,0.9);">
@@ -44,7 +41,8 @@ if (!$empresa_id) {
         </h4>
 
         <form action="store.php" method="POST">
-            <!-- input oculto con el id de la empresa -->
+            <input type="hidden" name="csrf_token" value="<?= generarTokenCSRF(); ?>">
+
             <input type="hidden" name="empresa_id" value="<?= htmlspecialchars($empresa_id) ?>">
 
             <div class="mb-3">
@@ -76,12 +74,10 @@ if (!$empresa_id) {
 
 </main>
 
-<!-- FOOTER -->
 <footer class="text-white text-center py-3 mt-auto">
     <small>© 2026 ICV - Todos los derechos reservados</small>
 </footer>
 
-<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
 

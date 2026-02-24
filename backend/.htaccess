@@ -1,0 +1,14 @@
+# 1. Evitar que se listen los archivos de las carpetas en el navegador
+Options -Indexes
+
+# 2. Bloquear específicamente el acceso al archivo de base de datos
+<Files "db.php">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# 3. Bloquear acceso al archivo de funciones de seguridad
+<Files "functions.php">
+    Order allow,deny
+    Deny from all
+</Files>

@@ -1,6 +1,8 @@
 <?php
 require "../config/db.php";
 require "../auth/guard.php";
+// --- NUEVO: CARGAR APARTADO DE SEGURIDAD ---
+require '../security/functions.php'; 
 
 $id = $_GET['id'] ?? null;
 
@@ -51,35 +53,37 @@ $empresa_id = $copiadora['empresa_id'];
         <h4 class="text-center text-primary mb-4">✏️ Editar Copiadora</h4>
 
         <form action="update.php" method="POST">
+            <input type="hidden" name="csrf_token" value="<?= generarTokenCSRF(); ?>">
+
             <input type="hidden" name="id" value="<?= $copiadora['id'] ?>">
             <input type="hidden" name="empresa_id" value="<?= $empresa_id ?>">
 
             <div class="mb-3">
                 <label class="form-label">Marca</label>
-                <input type="text" name="marca_impresora"
-                       class="form-control"
-                       value="<?= htmlspecialchars($copiadora['marca_impresora']) ?>"
+                <input type="text" name="marca_impresora" 
+                       class="form-control" 
+                       value="<?= htmlspecialchars($copiadora['marca_impresora']) ?>" 
                        required>
             </div>
 
             <div class="mb-3">
                 <label class="form-label">Número de serie</label>
-                <input type="text" name="numero_serie"
-                       class="form-control"
-                       value="<?= htmlspecialchars($copiadora['numero_serie']) ?>"
+                <input type="text" name="numero_serie" 
+                       class="form-control" 
+                       value="<?= htmlspecialchars($copiadora['numero_serie']) ?>" 
                        required>
             </div>
 
             <div class="mb-4">
                 <label class="form-label">Contador general</label>
-                <input type="number" name="contador_general"
-                       class="form-control"
-                       value="<?= $copiadora['contador_general'] ?>"
+                <input type="number" name="contador_general" 
+                       class="form-control" 
+                       value="<?= $copiadora['contador_general'] ?>" 
                        required>
             </div>
 
             <div class="d-flex justify-content-between">
-                <a href="../../frontend/pages/empresa.php?empresa_id=<?= $empresa_id ?>"
+                <a href="../../frontend/pages/empresa.php?empresa_id=<?= $empresa_id ?>" 
                    class="btn btn-secondary">⬅ Volver</a>
 
                 <button class="btn btn-info text-white">💾 Actualizar</button>

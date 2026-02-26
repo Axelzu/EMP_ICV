@@ -66,12 +66,13 @@ if (!isset($_SESSION['user_name']) || $_SESSION['user_name'] !== 'Admin') {
                 <tbody>
                     <?php
                     // 🔍 CONSULTA CON JOIN: Traemos el nombre del usuario desde la tabla usuarios
-                    $sql = "SELECT a.*, u.nombre 
-                            FROM auditoria a 
-                            INNER JOIN usuarios u ON a.user_id = u.id 
-                            ORDER BY a.fecha DESC LIMIT 100";
+                    // Cambia INNER JOIN por LEFT JOIN
+                $sql = "SELECT a.*, u.nombre 
+                    FROM auditoria a 
+                    LEFT JOIN usuarios u ON a.user_id = u.id 
+                    ORDER BY a.fecha DESC LIMIT 100";
                     
-                    $result = $conn->query($sql);
+                $result = $conn->query($sql);
 
                     if ($result && $result->num_rows > 0):
                         while ($row = $result->fetch_assoc()):

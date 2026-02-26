@@ -3,9 +3,9 @@ require "../../backend/config/db.php";
 require "../../backend/auth/guard.php";
 
 // 🛡️ SEGURIDAD PERSONALIZADA: 
-// Permitir el paso si el nombre de usuario es 'Admin'
+// Solo permitir el paso si el nombre de usuario es 'Admin'
 if (!isset($_SESSION['user_name']) || $_SESSION['user_name'] !== 'Admin') {
-    die("Acceso denegado: Solo el administrador (" . $_SESSION['user_name'] . ") no tiene permisos. Contacte al soporte.");
+    die("Acceso denegado: Solo el administrador (" . ($_SESSION['user_name'] ?? 'Invitado') . ") tiene permisos.");
 }
 ?>
 
@@ -65,17 +65,20 @@ if (!isset($_SESSION['user_name']) || $_SESSION['user_name'] !== 'Admin') {
                 </thead>
                 <tbody>
                     <?php
-                    // 🔍 CONSULTA CON JOIN: Traemos el nombre del usuario desde la tabla usuarios
-                    // Cambia INNER JOIN por LEFT JOIN
-                $sql = "SELECT a.*, u.nombre 
-                    FROM auditoria a 
-                    LEFT JOIN usuarios u ON a.user_id = u.id 
-                    ORDER BY a.fecha DESC LIMIT 100";
+                    // 🔍 CONSULTA MEJORADA CON LEFT JOIN
+                    // Traemos todos los logs, y si existe el usuario, su nombre.
+                    $sql = "SELECT a.*, u.nombre 
+                            FROM auditoria a 
+                            LEFT JOIN usuarios u ON a.user_id = u.id 
+                            ORDER BY a.fecha DESC LIMIT 100";
                     
-                $result = $conn->query($sql);
+                    $result = $conn->query($sql);
 
                     if ($result && $result->num_rows > 0):
                         while ($row = $result->fetch_assoc()):
+                            // Lógica para mostrar el nombre o un aviso si no existe
+                            $mostrarNombre = !empty($row['nombre']) ? $row['nombre'] : "ID: " . $row['user_id'] . " (Sin nombre)";
+                            
                             // Color del badge según la acción
                             $badgeClass = 'bg-primary';
                             if (strpos($row['accion'], 'ACTUALIZAR') !== false) $badgeClass = 'badge-update';
@@ -87,17 +90,19 @@ if (!isset($_SESSION['user_name']) || $_SESSION['user_name'] !== 'Admin') {
                             <span class="text-muted"><?= date('d/m/Y', strtotime($row['fecha'])) ?></span><br>
                             <strong><?= date('H:i:s', strtotime($row['fecha'])) ?></strong>
                         </td>
-                        <td><span class="user-name"><?= htmlspecialchars($row['nombre']) ?></span></td>
-                        <td><span class="badge <?= $badgeClass ?> p-2 px-3"><?= $row['accion'] ?></span></td>
+                        <td><span class="user-name"><?= htmlspecialchars($mostrarNombre) ?></span></td>
+                        <td><span class="badge <?= $badgeClass ?> p-2 px-3"><?= htmlspecialchars($row['accion']) ?></span></td>
                         <td style="max-width: 300px;"><small class="text-dark"><?= htmlspecialchars($row['detalle']) ?></small></td>
-                        <td><code class="bg-light p-1 rounded"><?= $row['ip'] ?></code></td>
+                        <td><code class="bg-light p-1 rounded"><?= htmlspecialchars($row['ip']) ?></code></td>
                     </tr>
                     <?php 
                         endwhile; 
                     else:
                     ?>
                     <tr>
-                        <td colspan="5" class="text-center py-5 text-muted">No hay movimientos registrados todavía.</td>
+                        <td colspan="5" class="text-center py-5 text-muted">
+                            No hay movimientos registrados todavía en la base de datos.
+                        </td>
                     </tr>
                     <?php endif; ?>
                 </tbody>

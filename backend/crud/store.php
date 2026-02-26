@@ -37,7 +37,7 @@ if ($stmt->execute()) {
     // 🛡️ MEDIDA 3: Registrar en Auditoría (Logs)
     // Pasamos $conn para asegurar la conexión a la base de datos
     $detalle_log = "El usuario creó la copiadora: $marca (Serie: $serie) para la empresa ID: $empresa_id";
-    registrarLog($conn, "REGISTRO_COPIADORA", $detalle_log);
+    registrarLog($conn, "REGISTRO", $detalle_log);
 
     // 2. Crear el Excel en la carpeta exports
     $datos = [[

@@ -30,13 +30,12 @@ if (!isset($_SESSION['user_rol']) || $_SESSION['user_rol'] !== 'admin') {
 
         /* ✨ EFECTO DE TRANSICIÓN SUAVE */
         .tab-pane {
-            transition: all 0.4s ease-in-out; /* Controla la velocidad aquí */
+            transition: all 0.4s ease-in-out;
         }
 
-        /* Animación de entrada: desvanecer y mover un poco */
         .fade {
             opacity: 0;
-            transform: translateX(10px); /* Pequeño movimiento a la derecha */
+            transform: translateX(15px); /* Movimiento sutil a la derecha */
         }
         .fade.show {
             opacity: 1;
@@ -54,10 +53,12 @@ if (!isset($_SESSION['user_rol']) || $_SESSION['user_rol'] !== 'admin') {
         .nav-pills .nav-link.active {
             background-color: #0A2540 !important;
             border-color: #0A2540;
-            transform: scale(1.05); /* Se agranda un poquito al activarse */
+            transform: scale(1.05);
         }
 
         .user-name { color: #007bff; font-weight: bold; }
+        .table thead { background-color: #f8f9fa; }
+        code { color: #d63384; font-size: 0.85em; }
     </style>
 </head>
 <body>
@@ -70,8 +71,8 @@ if (!isset($_SESSION['user_rol']) || $_SESSION['user_rol'] !== 'admin') {
 
 <div class="container mt-4 mb-5">
     <div class="text-center mb-4">
-        <h3 class="text-primary fw-bold">📜 Historial del Sistema</h3>
-        <p class="text-muted">Control de accesos y movimientos de formularios</p>
+        <h3 class="text-primary fw-bold">📜 Centro de Monitoreo</h3>
+        <p class="text-muted">Rastreo detallado de accesos y cambios en el sistema</p>
     </div>
 
     <ul class="nav nav-pills justify-content-center mb-4" id="pills-tab" role="tablist">
@@ -90,16 +91,16 @@ if (!isset($_SESSION['user_rol']) || $_SESSION['user_rol'] !== 'admin') {
     <div class="tab-content" id="pills-tabContent">
         
         <div class="tab-pane fade show active" id="content-login" role="tabpanel">
-            <div class="table-container">
-                <h5 class="text-info mb-4 border-bottom pb-2">Registro de Entradas</h5>
+            <div class="table-container shadow-sm">
+                <h5 class="text-info mb-4 border-bottom pb-2"><i class="bi bi-clock-history me-2"></i>Registro de Entradas</h5>
                 <div class="table-responsive">
                     <table class="table table-hover align-middle">
-                        <thead class="table-light">
+                        <thead>
                             <tr>
                                 <th>Fecha y Hora</th>
                                 <th>Usuario</th>
                                 <th>Acción</th>
-                                <th>IP</th>
+                                <th>Dirección IP</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -113,10 +114,10 @@ if (!isset($_SESSION['user_rol']) || $_SESSION['user_rol'] !== 'admin') {
                                 <td><?= date('d/m/Y H:i:s', strtotime($row['fecha'])) ?></td>
                                 <td><span class="user-name"><?= htmlspecialchars($row['nombre'] ?? "ID: ".$row['user_id']) ?></span></td>
                                 <td><span class="badge bg-info text-dark">LOGIN</span></td>
-                                <td><code class="text-muted"><?= $row['ip'] ?></code></td>
+                                <td><code><?= $row['ip'] ?></code></td>
                             </tr>
                             <?php endwhile; else: ?>
-                                <tr><td colspan="4" class="text-center py-4">No hay registros de login.</td></tr>
+                                <tr><td colspan="4" class="text-center py-4 text-muted">No hay registros de login.</td></tr>
                             <?php endif; ?>
                         </tbody>
                     </table>
@@ -125,16 +126,17 @@ if (!isset($_SESSION['user_rol']) || $_SESSION['user_rol'] !== 'admin') {
         </div>
 
         <div class="tab-pane fade" id="content-forms" role="tabpanel">
-            <div class="table-container">
-                <h5 class="text-success mb-4 border-bottom pb-2">Actividad en Formularios</h5>
+            <div class="table-container shadow-sm">
+                <h5 class="text-success mb-4 border-bottom pb-2"><i class="bi bi-pencil-square me-2"></i>Actividad en Formularios</h5>
                 <div class="table-responsive">
                     <table class="table table-hover align-middle">
-                        <thead class="table-light">
+                        <thead>
                             <tr>
                                 <th>Fecha y Hora</th>
                                 <th>Usuario</th>
                                 <th>Acción</th>
                                 <th>Detalle</th>
+                                <th>Dirección IP</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -149,13 +151,14 @@ if (!isset($_SESSION['user_rol']) || $_SESSION['user_rol'] !== 'admin') {
                                     if (strpos($row['accion'], 'ELIMINAR') !== false) $badge = 'bg-danger';
                             ?>
                             <tr>
-                                <td><?= date('d/m/Y H:i:s', strtotime($row['fecha'])) ?></td>
+                                <td class="text-nowrap small"><?= date('d/m/Y H:i:s', strtotime($row['fecha'])) ?></td>
                                 <td><span class="user-name"><?= htmlspecialchars($row['nombre'] ?? "ID: ".$row['user_id']) ?></span></td>
                                 <td><span class="badge <?= $badge ?>"><?= $row['accion'] ?></span></td>
-                                <td><small class="text-dark"><?= htmlspecialchars($row['detalle']) ?></small></td>
+                                <td style="max-width: 250px;"><small class="text-dark"><?= htmlspecialchars($row['detalle']) ?></small></td>
+                                <td><code><?= $row['ip'] ?></code></td>
                             </tr>
                             <?php endwhile; else: ?>
-                                <tr><td colspan="4" class="text-center py-4">No hay movimientos de formularios.</td></tr>
+                                <tr><td colspan="5" class="text-center py-4 text-muted">No hay movimientos de formularios registrados.</td></tr>
                             <?php endif; ?>
                         </tbody>
                     </table>

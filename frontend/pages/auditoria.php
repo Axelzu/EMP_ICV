@@ -29,6 +29,7 @@ if (!isset($_SESSION['user_name']) || $_SESSION['user_name'] !== 'Admin') {
         .navbar { background-color: #0A2540 !important; }
         .badge-update { background-color: #ffc107; color: black; font-size: 0.85em; }
         .badge-create { background-color: #28a745; font-size: 0.85em; }
+        .badge-login { background-color: #0dcaf0; color: black; font-size: 0.85em; }
         .table thead { background-color: #0A2540; color: white; }
         .user-name { color: #007bff; font-weight: bold; }
     </style>
@@ -65,24 +66,27 @@ if (!isset($_SESSION['user_name']) || $_SESSION['user_name'] !== 'Admin') {
                 </thead>
                 <tbody>
                     <?php
-                    // 🔍 CONSULTA MEJORADA CON LEFT JOIN
-                    // Traemos todos los logs, y si existe el usuario, su nombre.
+                    // 🔍 CONSULTA CORREGIDA: Cambiamos 'usuarios' por 'users' (como en tu login)
                     $sql = "SELECT a.*, u.nombre 
                             FROM auditoria a 
-                            LEFT JOIN usuarios u ON a.user_id = u.id 
+                            LEFT JOIN users u ON a.user_id = u.id 
                             ORDER BY a.fecha DESC LIMIT 100";
                     
                     $result = $conn->query($sql);
 
-                    if ($result && $result->num_rows > 0):
+                    // Si hay un error en la base de datos, lo mostramos aquí:
+                    if (!$result) {
+                        echo "<tr><td colspan='5' class='text-center text-danger'>Error en la base de datos: " . $conn->error . "</td></tr>";
+                    } elseif ($result->num_rows > 0) {
                         while ($row = $result->fetch_assoc()):
-                            // Lógica para mostrar el nombre o un aviso si no existe
-                            $mostrarNombre = !empty($row['nombre']) ? $row['nombre'] : "ID: " . $row['user_id'] . " (Sin nombre)";
+                            // Si el JOIN no encuentra el nombre, ponemos el ID
+                            $mostrarNombre = !empty($row['nombre']) ? $row['nombre'] : "ID: " . $row['user_id'] . " (Desconocido)";
                             
                             // Color del badge según la acción
                             $badgeClass = 'bg-primary';
                             if (strpos($row['accion'], 'ACTUALIZAR') !== false) $badgeClass = 'badge-update';
                             if (strpos($row['accion'], 'REGISTRO') !== false) $badgeClass = 'badge-create text-white';
+                            if (strpos($row['accion'], 'LOGIN') !== false) $badgeClass = 'badge-login';
                             if (strpos($row['accion'], 'ELIMINAR') !== false) $badgeClass = 'bg-danger';
                     ?>
                     <tr>
@@ -97,14 +101,14 @@ if (!isset($_SESSION['user_name']) || $_SESSION['user_name'] !== 'Admin') {
                     </tr>
                     <?php 
                         endwhile; 
-                    else:
+                    } else {
                     ?>
                     <tr>
                         <td colspan="5" class="text-center py-5 text-muted">
                             No hay movimientos registrados todavía en la base de datos.
                         </td>
                     </tr>
-                    <?php endif; ?>
+                    <?php } ?>
                 </tbody>
             </table>
         </div>

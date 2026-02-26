@@ -2,7 +2,7 @@
 require "../../backend/config/db.php";
 require "../../backend/auth/guard.php";
 
-// 🛡️ SEGURIDAD POR ROL: 
+// 🛡️ SEGURIDAD POR ROL
 if (!isset($_SESSION['user_rol']) || $_SESSION['user_rol'] !== 'admin') {
     die("Acceso denegado: Se requieren permisos de administrador.");
 }
@@ -18,26 +18,45 @@ if (!isset($_SESSION['user_rol']) || $_SESSION['user_rol'] !== 'admin') {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     
     <style>
-        body { background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
+        .navbar { background-color: #0A2540 !important; }
+        
         .table-container { 
             background: white; 
             border-radius: 15px; 
             padding: 30px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
-            margin-top: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
         }
-        .navbar { background-color: #0A2540 !important; }
-        .nav-pills .nav-link.active {
-            background-color: #0A2540;
-            color: white;
+
+        /* ✨ EFECTO DE TRANSICIÓN SUAVE */
+        .tab-pane {
+            transition: all 0.4s ease-in-out; /* Controla la velocidad aquí */
         }
-        .nav-link {
+
+        /* Animación de entrada: desvanecer y mover un poco */
+        .fade {
+            opacity: 0;
+            transform: translateX(10px); /* Pequeño movimiento a la derecha */
+        }
+        .fade.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .nav-pills .nav-link {
             color: #0A2540;
             font-weight: 600;
+            border: 1px solid #dee2e6;
+            margin: 0 5px;
+            transition: 0.3s;
         }
-        .badge-update { background-color: #ffc107; color: black; }
-        .badge-create { background-color: #28a745; color: white; }
-        .badge-login { background-color: #0dcaf0; color: black; }
+
+        .nav-pills .nav-link.active {
+            background-color: #0A2540 !important;
+            border-color: #0A2540;
+            transform: scale(1.05); /* Se agranda un poquito al activarse */
+        }
+
         .user-name { color: #007bff; font-weight: bold; }
     </style>
 </head>
@@ -47,43 +66,40 @@ if (!isset($_SESSION['user_rol']) || $_SESSION['user_rol'] !== 'admin') {
     <a class="navbar-brand d-flex align-items-center" href="inicio.php">
         <i class="bi bi-arrow-left-circle me-2"></i> ICV - Monitoreo
     </a>
-    <div class="navbar-text text-white d-none d-md-block">
-        Admin: <strong><?= htmlspecialchars($_SESSION['user_name']) ?></strong>
-    </div>
 </nav>
 
 <div class="container mt-4 mb-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="text-center mb-4">
         <h3 class="text-primary fw-bold">📜 Historial del Sistema</h3>
-        <a href="inicio.php" class="btn btn-outline-secondary btn-sm">Volver al Inicio</a>
+        <p class="text-muted">Control de accesos y movimientos de formularios</p>
     </div>
 
-    <ul class="nav nav-pills nav-fill gap-2 p-1 small bg-white border rounded-5 shadow-sm" id="pills-tab" role="tablist">
+    <ul class="nav nav-pills justify-content-center mb-4" id="pills-tab" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active rounded-5" id="tab-login" data-bs-toggle="pill" data-bs-target="#content-login" type="button" role="tab">
-                <i class="bi bi-person-lock"></i> Accesos (Login)
+            <button class="nav-link active rounded-pill px-4" id="tab-login" data-bs-toggle="pill" data-bs-target="#content-login" type="button" role="tab">
+                <i class="bi bi-person-lock me-2"></i> Accesos (Login)
             </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link rounded-5" id="tab-forms" data-bs-toggle="pill" data-bs-target="#content-forms" type="button" role="tab">
-                <i class="bi bi-file-earmark-diff"></i> Movimientos de Formularios
+            <button class="nav-link rounded-pill px-4" id="tab-forms" data-bs-toggle="pill" data-bs-target="#content-forms" type="button" role="tab">
+                <i class="bi bi-file-earmark-diff me-2"></i> Movimientos
             </button>
         </li>
     </ul>
 
-    <div class="tab-content mt-3" id="pills-tabContent">
+    <div class="tab-content" id="pills-tabContent">
         
         <div class="tab-pane fade show active" id="content-login" role="tabpanel">
             <div class="table-container">
-                <h5 class="text-info mb-4"><i class="bi bi-clock-history"></i> Registro de Entradas</h5>
+                <h5 class="text-info mb-4 border-bottom pb-2">Registro de Entradas</h5>
                 <div class="table-responsive">
                     <table class="table table-hover align-middle">
-                        <thead class="table-dark">
+                        <thead class="table-light">
                             <tr>
                                 <th>Fecha y Hora</th>
                                 <th>Usuario</th>
                                 <th>Acción</th>
-                                <th>Dirección IP</th>
+                                <th>IP</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -96,7 +112,7 @@ if (!isset($_SESSION['user_rol']) || $_SESSION['user_rol'] !== 'admin') {
                             <tr>
                                 <td><?= date('d/m/Y H:i:s', strtotime($row['fecha'])) ?></td>
                                 <td><span class="user-name"><?= htmlspecialchars($row['nombre'] ?? "ID: ".$row['user_id']) ?></span></td>
-                                <td><span class="badge badge-login">INICIO DE SESIÓN</span></td>
+                                <td><span class="badge bg-info text-dark">LOGIN</span></td>
                                 <td><code class="text-muted"><?= $row['ip'] ?></code></td>
                             </tr>
                             <?php endwhile; else: ?>
@@ -110,10 +126,10 @@ if (!isset($_SESSION['user_rol']) || $_SESSION['user_rol'] !== 'admin') {
 
         <div class="tab-pane fade" id="content-forms" role="tabpanel">
             <div class="table-container">
-                <h5 class="text-success mb-4"><i class="bi bi-pencil-square"></i> Actividad en Formularios</h5>
+                <h5 class="text-success mb-4 border-bottom pb-2">Actividad en Formularios</h5>
                 <div class="table-responsive">
                     <table class="table table-hover align-middle">
-                        <thead class="table-dark">
+                        <thead class="table-light">
                             <tr>
                                 <th>Fecha y Hora</th>
                                 <th>Usuario</th>
@@ -128,15 +144,15 @@ if (!isset($_SESSION['user_rol']) || $_SESSION['user_rol'] !== 'admin') {
                             if ($resForms && $resForms->num_rows > 0):
                                 while ($row = $resForms->fetch_assoc()):
                                     $badge = 'bg-primary';
-                                    if (strpos($row['accion'], 'REGISTRO') !== false) $badge = 'badge-create';
-                                    if (strpos($row['accion'], 'ACTUALIZAR') !== false) $badge = 'badge-update';
+                                    if (strpos($row['accion'], 'REGISTRO') !== false) $badge = 'bg-success';
+                                    if (strpos($row['accion'], 'ACTUALIZAR') !== false) $badge = 'bg-warning text-dark';
                                     if (strpos($row['accion'], 'ELIMINAR') !== false) $badge = 'bg-danger';
                             ?>
                             <tr>
                                 <td><?= date('d/m/Y H:i:s', strtotime($row['fecha'])) ?></td>
                                 <td><span class="user-name"><?= htmlspecialchars($row['nombre'] ?? "ID: ".$row['user_id']) ?></span></td>
                                 <td><span class="badge <?= $badge ?>"><?= $row['accion'] ?></span></td>
-                                <td><small><?= htmlspecialchars($row['detalle']) ?></small></td>
+                                <td><small class="text-dark"><?= htmlspecialchars($row['detalle']) ?></small></td>
                             </tr>
                             <?php endwhile; else: ?>
                                 <tr><td colspan="4" class="text-center py-4">No hay movimientos de formularios.</td></tr>
@@ -147,7 +163,8 @@ if (!isset($_SESSION['user_rol']) || $_SESSION['user_rol'] !== 'admin') {
             </div>
         </div>
 
-    </div> </div>
+    </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>

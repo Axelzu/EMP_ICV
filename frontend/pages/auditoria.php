@@ -2,10 +2,10 @@
 require "../../backend/config/db.php";
 require "../../backend/auth/guard.php";
 
-// 🛡️ SEGURIDAD PERSONALIZADA: 
-// Solo permitir el paso si el nombre de usuario es 'Admin'
-if (!isset($_SESSION['user_name']) || $_SESSION['user_name'] !== 'Admin') {
-    die("Acceso denegado: Solo el administrador (" . ($_SESSION['user_name'] ?? 'Invitado') . ") tiene permisos.");
+// 🛡️ SEGURIDAD POR ROL: 
+// Esto permite que 'Admin', 'Alex' o cualquier otro con el cargo correcto entre.
+if (!isset($_SESSION['user_rol']) || $_SESSION['user_rol'] !== 'admin') {
+    die("Acceso denegado: Se requieren permisos de administrador.");
 }
 ?>
 

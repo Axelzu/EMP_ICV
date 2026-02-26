@@ -35,7 +35,7 @@ if (!isset($_SESSION['user_rol']) || $_SESSION['user_rol'] !== 'admin') {
 
         .fade {
             opacity: 0;
-            transform: translateX(15px); /* Movimiento sutil a la derecha */
+            transform: translateX(15px);
         }
         .fade.show {
             opacity: 1;
@@ -70,9 +70,23 @@ if (!isset($_SESSION['user_rol']) || $_SESSION['user_rol'] !== 'admin') {
 </nav>
 
 <div class="container mt-4 mb-5">
-    <div class="text-center mb-4">
-        <h3 class="text-primary fw-bold">📜 Centro de Monitoreo</h3>
-        <p class="text-muted">Rastreo detallado de accesos y cambios en el sistema</p>
+
+    <?php if(isset($_GET['mensaje']) && $_GET['mensaje'] == 'limpiado'): ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert" style="transform: none; opacity: 1;">
+            <i class="bi bi-check-circle-fill me-2"></i> El historial ha sido vaciado correctamente.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <?php endif; ?>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="text-primary fw-bold mb-0">📜 Centro de Monitoreo</h3>
+            <p class="text-muted small">Rastreo detallado de accesos y cambios en el sistema</p>
+        </div>
+        
+        <button onclick="confirmarLimpieza()" class="btn btn-outline-danger shadow-sm fw-bold">
+            <i class="bi bi-trash3-fill me-1"></i> Limpiar Historial
+        </button>
     </div>
 
     <ul class="nav nav-pills justify-content-center mb-4" id="pills-tab" role="tablist">
@@ -170,5 +184,15 @@ if (!isset($_SESSION['user_rol']) || $_SESSION['user_rol'] !== 'admin') {
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+function confirmarLimpieza() {
+    if (confirm("¿Estás 100% seguro? Esta acción borrará TODO el historial de auditoría y no se puede recuperar.")) {
+        // Redirige al archivo que ejecuta el DELETE
+        window.location.href = "../../backend/admin/limpiar_auditoria.php";
+    }
+}
+</script>
+
 </body>
 </html>

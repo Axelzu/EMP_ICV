@@ -32,19 +32,43 @@ $logos = [
             max-width: 600px;
             margin: 0 auto 30px auto;
         }
-        .search-input {
-            border-radius: 50px !important;
-            padding-left: 20px;
+        
+        /* ✨ SOLUCIÓN AL DETALLE VISUAL: Unificación del buscador */
+        .search-wrapper {
+            display: flex;
             border: 2px solid #e0e0e0;
+            border-radius: 50px;
+            overflow: hidden;
+            background-color: white;
             transition: all 0.3s ease;
         }
-        .search-input:focus {
+
+        .search-wrapper:focus-within {
             border-color: #0A2540;
             box-shadow: 0 0 10px rgba(10, 37, 64, 0.1);
         }
+
+        .search-icon-box {
+            background-color: white;
+            border: none;
+            padding-left: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .search-input {
+            border: none !important;
+            border-radius: 0 50px 50px 0 !important;
+            padding: 12px 20px 12px 10px;
+            height: 50px;
+            box-shadow: none !important;
+        }
+
         .tarjeta-empresa {
             transition: transform 0.3s ease, opacity 0.3s ease;
         }
+
         .no-results-msg {
             display: none;
             padding: 40px;
@@ -92,11 +116,11 @@ $logos = [
 
 <section class="container mb-4">
     <div class="search-container">
-        <div class="input-group">
-            <span class="input-group-text bg-white border-end-0 rounded-start-pill">
+        <div class="search-wrapper">
+            <div class="search-icon-box">
                 <i class="bi bi-search text-primary"></i>
-            </span>
-            <input type="text" id="inputBuscador" class="form-control border-start-0 rounded-end-pill search-input" placeholder="Escribe el nombre de la empresa...">
+            </div>
+            <input type="text" id="inputBuscador" class="form-control search-input" placeholder="Escribe el nombre de la empresa...">
         </div>
     </div>
 </section>
@@ -157,7 +181,6 @@ document.getElementById('inputBuscador').addEventListener('input', function(e) {
         }
     });
 
-    // Manejo de mensaje de "No hay resultados"
     const mensaje = document.getElementById('mensajeVacio');
     if (contadorResultados === 0) {
         mensaje.style.display = 'block';
@@ -173,7 +196,6 @@ function limpiarBuscador() {
     input.focus();
 }
 
-// Configuración de Partículas
 particlesJS("particles-js", {
     particles: {
         number: { value: 60, density: { enable: true, value_area: 800 } },

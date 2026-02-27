@@ -84,7 +84,7 @@ $logos = [
 <div id="particles-js"></div>
 
 <nav class="navbar navbar-dark px-4 shadow-sm">
-    <span class="navbar-brand fw-bold">ICV - Gestión</span>
+    <span class="navbar-brand fw-bold">ICV</span>
     
     <div class="d-flex gap-2">
         <?php if (isset($_SESSION['user_rol']) && $_SESSION['user_rol'] === 'admin'): ?>

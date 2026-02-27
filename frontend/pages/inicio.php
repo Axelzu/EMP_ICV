@@ -87,8 +87,11 @@ $logos = [
     <span class="navbar-brand fw-bold">ICV - Gestión</span>
     
     <div class="d-flex gap-2">
-        <?php if (isset($_SESSION['user_name']) && $_SESSION['user_name'] === 'Admin'): ?>
-            <a href="auditoria.php" class="btn btn-warning btn-sm fw-bold shadow-sm">
+        <?php if (isset($_SESSION['user_rol']) && $_SESSION['user_rol'] === 'admin'): ?>
+            <a href="usuarios.php" class="btn btn-primary btn-sm fw-bold shadow-sm">
+                <i class="bi bi-people-fill"></i> Usuarios
+            </a>
+            <a href="auditoria.php" class="btn btn-warning btn-sm fw-bold shadow-sm text-dark">
                 <i class="bi bi-eye-fill"></i> Monitoreo
             </a>
         <?php endif; ?>
@@ -106,8 +109,10 @@ $logos = [
             <div>
                 <h5 class="mb-0">Bienvenido</h5>
                 <strong class="text-primary fs-5"><?= htmlspecialchars($usuario) ?></strong>
-                <?php if ($_SESSION['user_name'] === 'Admin'): ?>
+                <?php if (isset($_SESSION['user_rol']) && $_SESSION['user_rol'] === 'admin'): ?>
                     <span class="badge bg-primary d-block mt-1">Administrador</span>
+                <?php else: ?>
+                    <span class="badge bg-secondary d-block mt-1">Técnico</span>
                 <?php endif; ?>
             </div>
         </div>

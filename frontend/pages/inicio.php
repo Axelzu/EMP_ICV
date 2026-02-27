@@ -125,7 +125,7 @@ $logos = [
             <div class="search-icon-box">
                 <i class="bi bi-search text-primary"></i>
             </div>
-            <input type="text" id="inputBuscador" class="form-control search-input" placeholder="Escribe el nombre de la empresa...">
+            <input type="text" id="inputBuscador" class="form-control search-input" placeholder="Escribe el nombre del cliente...">
         </div>
     </div>
 </section>
@@ -135,7 +135,7 @@ $logos = [
 
     <div id="mensajeVacio" class="no-results-msg shadow-sm">
         <i class="bi bi-search-heart fs-1 text-muted"></i>
-        <p class="mt-3 fs-5 text-muted">No encontramos ninguna empresa que coincida con tu búsqueda.</p>
+        <p class="mt-3 fs-5 text-muted">No encontramos ningun cliente que coincida con tu búsqueda.</p>
         <button onclick="limpiarBuscador()" class="btn btn-outline-primary btn-sm">Ver todos los clientes</button>
     </div>
 

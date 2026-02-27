@@ -21,13 +21,39 @@ $logos = [
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>ICV - Inicio</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-
     <link rel="stylesheet" href="../assets/css/custom.css">
+
+    <style>
+        .search-container {
+            max-width: 600px;
+            margin: 0 auto 30px auto;
+        }
+        .search-input {
+            border-radius: 50px !important;
+            padding-left: 20px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+        .search-input:focus {
+            border-color: #0A2540;
+            box-shadow: 0 0 10px rgba(10, 37, 64, 0.1);
+        }
+        .tarjeta-empresa {
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .no-results-msg {
+            display: none;
+            padding: 40px;
+            text-align: center;
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+    </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
 
@@ -64,21 +90,37 @@ $logos = [
     </div>
 </section>
 
-<section class="container flex-grow-1">
-    <h4 class="mb-4 text-primary fw-bold">Clientes</h4>
+<section class="container mb-4">
+    <div class="search-container">
+        <div class="input-group">
+            <span class="input-group-text bg-white border-end-0 rounded-start-pill">
+                <i class="bi bi-search text-primary"></i>
+            </span>
+            <input type="text" id="inputBuscador" class="form-control border-start-0 rounded-end-pill search-input" placeholder="Escribe el nombre de la empresa...">
+        </div>
+    </div>
+</section>
 
-    <div class="row g-3">
+<section class="container flex-grow-1 mb-5">
+    <h4 class="mb-4 text-primary fw-bold"><i class="bi bi-building me-2"></i>Nuestros Clientes</h4>
+
+    <div id="mensajeVacio" class="no-results-msg shadow-sm">
+        <i class="bi bi-search-heart fs-1 text-muted"></i>
+        <p class="mt-3 fs-5 text-muted">No encontramos ninguna empresa que coincida con tu búsqueda.</p>
+        <button onclick="limpiarBuscador()" class="btn btn-outline-primary btn-sm">Ver todos los clientes</button>
+    </div>
+
+    <div class="row g-3" id="listaEmpresas">
         <?php while ($empresa = $empresas->fetch_assoc()): ?>
             <?php 
-            // Determinar qué logo usar
             $logo = $logos[$empresa['id']] ?? 'empresa.png';
             ?>
-            <div class="col-md-6 col-lg-4">
+            <div class="col-md-6 col-lg-4 tarjeta-empresa">
                 <a href="empresa.php?empresa_id=<?= $empresa['id'] ?>" class="text-decoration-none">
                     <div class="card shadow empresa-card h-100 border-0">
                         <div class="card-body d-flex align-items-center">
                             <img src="../assets/images/<?= $logo ?>" width="60" height="60" class="me-3 rounded-circle object-fit-cover shadow-sm">
-                            <h6 class="mb-0 text-dark fw-bold">
+                            <h6 class="mb-0 text-dark fw-bold nombre-empresa">
                                 <?= strtoupper(htmlspecialchars($empresa['nombre'])) ?>
                             </h6>
                         </div>
@@ -97,23 +139,58 @@ $logos = [
 <script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
 
 <script>
+document.getElementById('inputBuscador').addEventListener('input', function(e) {
+    let busqueda = e.target.value.toLowerCase().trim();
+    let tarjetas = document.querySelectorAll('.tarjeta-empresa');
+    let contadorResultados = 0;
+
+    tarjetas.forEach(tarjeta => {
+        let nombre = tarjeta.querySelector('.nombre-empresa').textContent.toLowerCase();
+        
+        if (nombre.includes(busqueda)) {
+            tarjeta.style.display = 'block';
+            tarjeta.style.opacity = '1';
+            contadorResultados++;
+        } else {
+            tarjeta.style.display = 'none';
+            tarjeta.style.opacity = '0';
+        }
+    });
+
+    // Manejo de mensaje de "No hay resultados"
+    const mensaje = document.getElementById('mensajeVacio');
+    if (contadorResultados === 0) {
+        mensaje.style.display = 'block';
+    } else {
+        mensaje.style.display = 'none';
+    }
+});
+
+function limpiarBuscador() {
+    let input = document.getElementById('inputBuscador');
+    input.value = '';
+    input.dispatchEvent(new Event('input'));
+    input.focus();
+}
+
+// Configuración de Partículas
 particlesJS("particles-js", {
-  particles: {
-    number: { value: 80, density: { enable: true, value_area: 800 } },
-    color: { value: "#0A2540" },
-    shape: { type: "circle" },
-    opacity: { value: 0.5 },
-    size: { value: 3 },
-    line_linked: {
-      enable: true,
-      distance: 150,
-      color: "#0A2540",
-      opacity: 0.4,
-      width: 1
+    particles: {
+        number: { value: 60, density: { enable: true, value_area: 800 } },
+        color: { value: "#0A2540" },
+        shape: { type: "circle" },
+        opacity: { value: 0.3 },
+        size: { value: 3 },
+        line_linked: {
+            enable: true,
+            distance: 150,
+            color: "#0A2540",
+            opacity: 0.2,
+            width: 1
+        },
+        move: { enable: true, speed: 2 }
     },
-    move: { enable: true, speed: 3 }
-  },
-  retina_detect: true
+    retina_detect: true
 });
 </script>
 

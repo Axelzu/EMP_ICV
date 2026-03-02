@@ -12,7 +12,7 @@ $logos = [
     2 => 'c_internacional.png',
     3 => 'c_cruzmedic.png',
     4 => 'empresa4.png',
-    5 => 'empresa5.png'
+    5 => 'FGDE.png'
 ];
 ?>
 

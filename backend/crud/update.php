@@ -1,7 +1,7 @@
 <?php
 require "../config/db.php";
 require "../config/excel.php";
-// --- NUEVO: CARGAR SEGURIDAD Y AUDITORÍA ---
+// --- CARGAR SEGURIDAD Y AUDITORÍA ---
 require "../security/functions.php"; 
 
 // 🛡️ MEDIDA 1: Verificar el Token CSRF
@@ -29,11 +29,44 @@ $stmt->execute();
 // 🛡️ MEDIDA 3: Registrar en Auditoría (Logs)
 registrarLog($conn, "ACTUALIZACIÓN", "El usuario editó la copiadora ID: $id (Empresa: $empresa_id)");
 
-// 2. Sobrescribir el Excel local
-$datos = [['ID' => $id, 'Empresa' => $empresa_id, 'Marca' => $marca, 'Serie' => $serie, 'Contador' => $contador]];
-$nombreExcel = "empresa_{$empresa_id}_copiadora_{$id}.xlsx";
+// --- NUEVO: OBTENER NOMBRE DE LA EMPRESA PARA EL NOMBRE DEL EXCEL ---
+$sql_emp = "SELECT nombre FROM empresas WHERE id = ?";
+$stmt_emp = $conn->prepare($sql_emp);
+$stmt_emp->bind_param("i", $empresa_id);
+$stmt_emp->execute();
+$res_emp = $stmt_emp->get_result();
+$data_emp = $res_emp->fetch_assoc();
+
+// Limpiamos el nombre (quitar espacios por guiones bajos)
+$nombreEmpresaOriginal = $data_emp['nombre'] ?? 'Empresa';
+$nombreEmpresaLimpio = str_replace([' ', '.', ','], '_', $nombreEmpresaOriginal);
+
+// Generamos la fecha y hora actual (Formato: d_m_y_H_i)
+$fechaHora = date('d_m_y_H_i');
+
+// 2. Definir datos y Nombre del Excel
+// Incluimos el ID de la impresora al inicio para que el sistema sepa qué archivo sobrescribir si editas de nuevo
+$datos = [[
+    'ID' => $id, 
+    'Empresa' => $nombreEmpresaOriginal, 
+    'Marca' => $marca, 
+    'Serie' => $serie, 
+    'Contador' => $contador
+]];
+
+// El nombre quedará: ID_Clinica_Internacional_12_02_26_14_15.xlsx
+$nombreExcel = $id . "_" . $nombreEmpresaLimpio . "_" . $fechaHora . ".xlsx";
 $rutaPublica = $_SERVER['DOCUMENT_ROOT'] . "/exports/" . $nombreExcel;
 
+// --- LÓGICA DE SOBRESCRITURA ---
+// Buscamos si ya existe un archivo previo de este ID de registro para borrarlo antes de crear el nuevo
+$patron = $_SERVER['DOCUMENT_ROOT'] . "/exports/" . $id . "_*.xlsx";
+$archivosViejos = glob($patron);
+foreach($archivosViejos as $archivoViejo){
+    if(is_file($archivoViejo)) unlink($archivoViejo);
+}
+
+// Generamos el nuevo Excel actualizado
 generarExcel($datos, $rutaPublica);
 
 // 3. Redireccionar

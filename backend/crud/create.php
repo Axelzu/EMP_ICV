@@ -18,13 +18,12 @@ if (!$empresa_id) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../../frontend/assets/css/custom.css">
     <style>
-        /* ESTO ASEGURA QUE LAS PARTÍCULAS CUBRAN TODA LA PANTALLA */
         #particles-js {
             position: fixed;
             width: 100%;
             height: 100%;
-            background-color: #f8f9fa; /* Color de fondo suave */
-            z-index: -1; /* Las manda al fondo */
+            background-color: #f8f9fa;
+            z-index: -1;
             top: 0;
             left: 0;
         }
@@ -32,6 +31,7 @@ if (!$empresa_id) {
             z-index: 10;
             background-color: rgba(255, 255, 255, 0.9) !important;
             border-radius: 15px;
+            width: 500px; /* Un poco más ancho para los contadores */
         }
     </style>
 </head>
@@ -47,8 +47,8 @@ if (!$empresa_id) {
     </a>
 </nav>
 
-<main class="flex-grow-1 d-flex align-items-center justify-content-center">
-    <div class="card shadow form-card" style="width: 400px;">
+<main class="flex-grow-1 d-flex align-items-center justify-content-center py-4">
+    <div class="card shadow form-card">
         <div class="card-body p-4">
             <h4 class="text-center text-primary mb-4">➕ Registrar Copiadora</h4>
 
@@ -57,21 +57,54 @@ if (!$empresa_id) {
                 <input type="hidden" name="empresa_id" value="<?= htmlspecialchars($empresa_id) ?>">
 
                 <div class="mb-3">
-                    <label class="form-label fw-bold">Marca de la impresora</label>
-                    <input type="text" name="marca_impresora" class="form-control" placeholder="Ej: Ricoh" required>
+                    <label class="form-label fw-bold small">Departamento / Dependencia</label>
+                    <input type="text" name="dependencia" class="form-control" placeholder="Ej: Contabilidad" required>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label fw-bold">Número de serie</label>
-                    <input type="text" name="numero_serie" class="form-control" placeholder="Serie del equipo" required>
+                    <label class="form-label fw-bold small">Marca y Modelo</label>
+                    <input type="text" name="marca_modelo" class="form-control" placeholder="Ej: Ricoh MP 301" required>
                 </div>
 
-                <div class="mb-4">
-                    <label class="form-label fw-bold">Contador general</label>
-                    <input type="number" name="contador_general" class="form-control" placeholder="0" required>
+                <div class="mb-3">
+                    <label class="form-label fw-bold small">Número de Serie</label>
+                    <input type="text" name="serie" class="form-control" placeholder="Serie del equipo" required>
                 </div>
 
-                <div class="d-flex justify-content-between">
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label class="form-label fw-bold small">Fecha Inicial</label>
+                        <input type="date" name="fecha_inicial" class="form-control" required>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label fw-bold small">Fecha Final</label>
+                        <input type="date" name="fecha_final" class="form-control" required>
+                    </div>
+                </div>
+
+                <hr>
+                <h6 class="text-primary fw-bold mb-3">🔢 Lectura de Contadores</h6>
+
+                <div class="row g-2">
+                    <div class="col-6">
+                        <label class="small fw-bold">Copias B/N</label>
+                        <input type="number" name="copias_bn" class="form-control" value="0">
+                    </div>
+                    <div class="col-6">
+                        <label class="small fw-bold">Copias Color</label>
+                        <input type="number" name="copias_color" class="form-control" value="0">
+                    </div>
+                    <div class="col-6">
+                        <label class="small fw-bold">Impresiones B/N</label>
+                        <input type="number" name="impresiones_bn" class="form-control" value="0">
+                    </div>
+                    <div class="col-6">
+                        <label class="small fw-bold">Impresiones Color</label>
+                        <input type="number" name="impresiones_color" class="form-control" value="0">
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
                     <a href="../../frontend/pages/empresa.php?empresa_id=<?= $empresa_id ?>" class="btn btn-secondary">⬅ Cancelar</a>
                     <button type="submit" class="btn btn-info text-white shadow-sm">💾 Guardar</button>
                 </div>

@@ -1,7 +1,6 @@
 <?php
 require "../config/db.php";
 require "../auth/guard.php";
-// Usamos la ruta absoluta para evitar fallos en cPanel
 require_once $_SERVER['DOCUMENT_ROOT'] . '/backend/security/functions.php'; 
 
 $id = $_GET['id'] ?? null;
@@ -10,7 +9,7 @@ if (!$id) {
     die("Copiadora no seleccionada");
 }
 
-/* Buscar copiadora */
+/* Buscar copiadora con las nuevas columnas */
 $sql = "SELECT * FROM impresoras_formulario WHERE id = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $id);
@@ -31,17 +30,14 @@ $empresa_id = $copiadora['empresa_id'];
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Copiadora | ICV</title>
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../../frontend/assets/css/custom.css">
-    
     <style>
-        /* CONFIGURACIÓN DE PARTÍCULAS IGUAL A CREATE.PHP */
         #particles-js {
             position: fixed;
             width: 100%;
             height: 100%;
-            background-color: #f8f9fa; /* Fondo gris claro profesional */
+            background-color: #f8f9fa;
             z-index: -1;
             top: 0;
             left: 0;
@@ -51,7 +47,7 @@ $empresa_id = $copiadora['empresa_id'];
             background-color: rgba(255, 255, 255, 0.95) !important;
             border-radius: 15px;
             padding: 20px;
-            width: 400px;
+            width: 500px;
         }
         .navbar, footer {
             background-color: #0A2540;
@@ -71,45 +67,66 @@ $empresa_id = $copiadora['empresa_id'];
     </a>
 </nav>
 
-<main class="flex-grow-1 d-flex align-items-center justify-content-center">
+<main class="flex-grow-1 d-flex align-items-center justify-content-center py-4">
     <div class="card shadow form-card">
 
         <h4 class="text-center text-primary mb-4">✏️ Editar Copiadora</h4>
 
         <form action="update.php" method="POST">
             <input type="hidden" name="csrf_token" value="<?= generarTokenCSRF(); ?>">
-
             <input type="hidden" name="id" value="<?= $copiadora['id'] ?>">
             <input type="hidden" name="empresa_id" value="<?= $empresa_id ?>">
 
             <div class="mb-3">
-                <label class="form-label fw-bold">Marca</label>
-                <input type="text" name="marca_impresora" 
-                       class="form-control" 
-                       value="<?= htmlspecialchars($copiadora['marca_impresora']) ?>" 
-                       required>
+                <label class="form-label fw-bold small">Departamento / Dependencia</label>
+                <input type="text" name="dependencia" class="form-control" value="<?= htmlspecialchars($copiadora['dependencia']) ?>" required>
             </div>
 
             <div class="mb-3">
-                <label class="form-label fw-bold">Número de serie</label>
-                <input type="text" name="numero_serie" 
-                       class="form-control" 
-                       value="<?= htmlspecialchars($copiadora['numero_serie']) ?>" 
-                       required>
+                <label class="form-label fw-bold small">Marca y Modelo</label>
+                <input type="text" name="marca_modelo" class="form-control" value="<?= htmlspecialchars($copiadora['marca_modelo']) ?>" required>
             </div>
 
-            <div class="mb-4">
-                <label class="form-label fw-bold">Contador general</label>
-                <input type="number" name="contador_general" 
-                       class="form-control" 
-                       value="<?= $copiadora['contador_general'] ?>" 
-                       required>
+            <div class="mb-3">
+                <label class="form-label fw-bold small">Serie</label>
+                <input type="text" name="serie" class="form-control" value="<?= htmlspecialchars($copiadora['serie']) ?>" required>
             </div>
 
-            <div class="d-flex justify-content-between">
-                <a href="../../frontend/pages/empresa.php?empresa_id=<?= $empresa_id ?>" 
-                   class="btn btn-secondary">⬅ Volver</a>
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <label class="form-label fw-bold small">Fecha Inicial</label>
+                    <input type="date" name="fecha_inicial" class="form-control" value="<?= $copiadora['fecha_inicial'] ?>" required>
+                </div>
+                <div class="col-6">
+                    <label class="form-label fw-bold small">Fecha Final</label>
+                    <input type="date" name="fecha_final" class="form-control" value="<?= $copiadora['fecha_final'] ?>" required>
+                </div>
+            </div>
 
+            <hr>
+            <h6 class="text-primary fw-bold mb-3">🔢 Lectura de Contadores</h6>
+
+            <div class="row g-2">
+                <div class="col-6">
+                    <label class="small fw-bold">Copias B/N</label>
+                    <input type="number" name="copias_bn" class="form-control" value="<?= $copiadora['copias_bn'] ?>">
+                </div>
+                <div class="col-6">
+                    <label class="small fw-bold">Copias Color</label>
+                    <input type="number" name="copias_color" class="form-control" value="<?= $copiadora['copias_color'] ?>">
+                </div>
+                <div class="col-6">
+                    <label class="small fw-bold">Impresiones B/N</label>
+                    <input type="number" name="impresiones_bn" class="form-control" value="<?= $copiadora['impresiones_bn'] ?>">
+                </div>
+                <div class="col-6">
+                    <label class="small fw-bold">Impresiones Color</label>
+                    <input type="number" name="impresiones_color" class="form-control" value="<?= $copiadora['impresiones_color'] ?>">
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between mt-4">
+                <a href="../../frontend/pages/empresa.php?empresa_id=<?= $empresa_id ?>" class="btn btn-secondary">⬅ Volver</a>
                 <button type="submit" class="btn btn-info text-white shadow-sm">💾 Actualizar</button>
             </div>
         </form>
@@ -126,22 +143,14 @@ $empresa_id = $copiadora['empresa_id'];
     particlesJS("particles-js", {
         "particles": {
             "number": { "value": 80, "density": { "enable": true, "value_area": 800 } },
-            "color": { "value": "#0A2540" }, /* Color azul ICV */
+            "color": { "value": "#0A2540" },
             "shape": { "type": "circle" },
             "opacity": { "value": 0.5 },
             "size": { "value": 3 },
-            "line_linked": { 
-                "enable": true, 
-                "distance": 150, 
-                "color": "#0A2540", 
-                "opacity": 0.4, 
-                "width": 1 
-            },
+            "line_linked": { "enable": true, "distance": 150, "color": "#0A2540", "opacity": 0.4, "width": 1 },
             "move": { "enable": true, "speed": 3 }
         },
-        "interactivity": {
-            "events": { "onhover": { "enable": true, "mode": "grab" } }
-        },
+        "interactivity": { "events": { "onhover": { "enable": true, "mode": "grab" } } },
         "retina_detect": true
     });
 </script>

@@ -32,7 +32,7 @@ if (!$empresa_id || empty($marca_modelo) || empty($serie)) {
 
 // 1. Guardar en Base de Datos (Estructura Actualizada)
 $sql = "INSERT INTO impresoras_formulario 
-        (empresa_id, dependencia, marca_modelo, serie, copias_bn, copias_color, impresiones_bn, impresiones_color, fecha_inicial, fecha_final) 
+        (empresa_id, dependencia, marca_modelo, serie, copias_bn, copias_color, impresiones_bn, impresiones_color, contador_fecha_inicial, contador_fecha_final) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 $stmt = $conn->prepare($sql);

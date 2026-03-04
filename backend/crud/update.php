@@ -78,6 +78,7 @@ $datos = [[
     'COPIAS COL' => $c_col,
     'IMPRES B/N' => $i_bn,
     'IMPRES COL' => $i_col,
+    'TOTAL' => ($c_bn + $c_col + $i_bn + $i_col)
 ]];
 
 $rutaPublica = $_SERVER['DOCUMENT_ROOT'] . "/exports/" . $nombreExcel;

@@ -83,7 +83,7 @@ if (!$empresa_id) {
                 </div>
 
                 <hr>
-                <h6 class="text-primary fw-bold mb-3">🔢 Lectura de Contadores</h6>
+                <h6 class="text-primary fw-bold mb-3">🔢 Lectura de Copias e impresiones</h6>
 
                 <div class="row g-2">
                     <div class="col-6">

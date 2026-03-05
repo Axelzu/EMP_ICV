@@ -64,7 +64,12 @@ if ($stmt->execute()) {
     // 4. Registrar Log
     registrarLog($conn, "REGISTRO", "Se creó copiadora $marca_modelo para empresa $empresa_id");
 
-    // 5. Generar el Excel físico con los nuevos encabezados
+    // --- CÁLCULO DE TOTALES PARA EXCEL ---
+    $subtotal_bn    = $c_bn + $i_bn;
+    $subtotal_color = $c_col + $i_col;
+    $total_general  = $subtotal_bn + $subtotal_color;
+
+    // 5. Generar el Excel físico con los nuevos encabezados y totales
     $datos = [[
         'ID' => $id_impresora, 
         'DEPTO' => $dependencia,
@@ -72,11 +77,13 @@ if ($stmt->execute()) {
         'SERIE' => $serie, 
         'FECHA INI' => $f_ini,
         'FECHA FIN' => $f_fin,
-        'COPIAS B/N' => $c_bn,
-        'COPIAS COL' => $c_col,
-        'IMPRES B/N' => $i_bn,
-        'IMPRES COL' => $i_col,
-        'TOTAL' => ($c_bn + $c_col + $i_bn + $i_col)
+        'COP B/N' => $c_bn,
+        'IMP B/N' => $i_bn,
+        'TOTAL B/N' => $subtotal_bn, // Nuevo Total BN
+        'COP COL' => $c_col,
+        'IMP COL' => $i_col,
+        'TOTAL COL' => $subtotal_color, // Nuevo Total Color
+        'TOTAL GENERAL' => $total_general
     ]];
     
     $rutaPublica = $_SERVER['DOCUMENT_ROOT'] . "/exports/" . $nombreExcel;

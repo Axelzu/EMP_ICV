@@ -66,6 +66,11 @@ if (empty($nombreExcel)) {
     $upd_name->execute();
 }
 
+// --- CÁLCULO DE TOTALES PARA EXCEL ---
+$subtotal_bn    = $c_bn + $i_bn;
+$subtotal_color = $c_col + $i_col;
+$total_general  = $subtotal_bn + $subtotal_color;
+
 // 5. Preparar datos para el Excel
 $datos = [[
     'ID' => $id, 
@@ -74,11 +79,13 @@ $datos = [[
     'SERIE' => $serie, 
     'FECHA INI' => $f_ini,
     'FECHA FIN' => $f_fin,
-    'COPIAS B/N' => $c_bn,
-    'COPIAS COL' => $c_col,
-    'IMPRES B/N' => $i_bn,
-    'IMPRES COL' => $i_col,
-    'TOTAL' => ($c_bn + $c_col + $i_bn + $i_col)
+    'COP B/N' => $c_bn,
+    'IMP B/N' => $i_bn,
+    'TOTAL B/N' => $subtotal_bn, // Nuevo Total BN
+    'COP COL' => $c_col,
+    'IMP COL' => $i_col,
+    'TOTAL COL' => $subtotal_color, // Nuevo Total Color
+    'TOTAL GENERAL' => $total_general
 ]];
 
 $rutaPublica = $_SERVER['DOCUMENT_ROOT'] . "/exports/" . $nombreExcel;

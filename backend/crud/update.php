@@ -71,7 +71,7 @@ $subtotal_bn    = $c_bn + $i_bn;
 $subtotal_color = $c_col + $i_col;
 $total_general  = $subtotal_bn + $subtotal_color;
 
-// 5. Preparar datos para el Excel
+// 5. Preparar datos para el Excel con TOTALES AL FINAL
 $datos = [[
     'ID' => $id, 
     'DEPTO' => $dependencia,
@@ -81,11 +81,11 @@ $datos = [[
     'FECHA FIN' => $f_fin,
     'COP B/N' => $c_bn,
     'IMP B/N' => $i_bn,
-    'TOTAL B/N' => $subtotal_bn, // Nuevo Total BN
     'COP COL' => $c_col,
     'IMP COL' => $i_col,
-    'TOTAL COL' => $subtotal_color, // Nuevo Total Color
-    'TOTAL GENERAL' => $total_general
+    'TOTAL B/N' => $subtotal_bn,      // Mover al final
+    'TOTAL COL' => $subtotal_color,   // Mover al final
+    'TOTAL GENERAL' => $total_general // Mover al final
 ]];
 
 $rutaPublica = $_SERVER['DOCUMENT_ROOT'] . "/exports/" . $nombreExcel;

@@ -6,7 +6,7 @@ if (!isset($empresa_id)) {
     die("Empresa no definida");
 }
 
-// Consultamos las nuevas columnas de la base de datos
+// Consultamos las columnas de la base de datos
 $sql = "SELECT id, dependencia, marca_modelo, serie, copias_bn, copias_color, impresiones_bn, impresiones_color 
         FROM impresoras_formulario 
         WHERE empresa_id = ? 
@@ -25,28 +25,32 @@ $result = $stmt->get_result();
             <th class="small">Marca/Modelo</th>
             <th class="small">Serie</th>
             <th class="small">Cop. B/N</th>
-            <th class="small">Cop. Col</th>
             <th class="small">Imp. B/N</th>
+            <th class="small text-warning">TOTAL B/N</th> <th class="small">Cop. Col</th>
             <th class="small">Imp. Col</th>
-            <th class="small text-info">Total</th>
-            <th class="small">Acciones</th>
+            <th class="small text-info">TOTAL COL</th> <th class="small">Acciones</th>
         </tr>
     </thead>
 
     <tbody>
         <?php while ($row = $result->fetch_assoc()) { 
-            // Sumamos todos los contadores para mostrar el total en la tabla
-            $total_general = $row['copias_bn'] + $row['copias_color'] + $row['impresiones_bn'] + $row['impresiones_color'];
+            // CÁLCULO DE LOS DOS TOTALES SOLICITADOS
+            $total_bn = $row['copias_bn'] + $row['impresiones_bn'];
+            $total_color = $row['copias_color'] + $row['impresiones_color'];
         ?>
             <tr>
                 <td class="small fw-bold"><?= htmlspecialchars($row['dependencia']) ?></td>
                 <td class="small"><?= htmlspecialchars($row['marca_modelo']) ?></td>
                 <td class="small"><?= htmlspecialchars($row['serie']) ?></td>
+                
                 <td class="small"><?= number_format($row['copias_bn']) ?></td>
-                <td class="small"><?= number_format($row['copias_color']) ?></td>
                 <td class="small"><?= number_format($row['impresiones_bn']) ?></td>
+                <td class="small fw-bold table-secondary"><?= number_format($total_bn) ?></td>
+
+                <td class="small"><?= number_format($row['copias_color']) ?></td>
                 <td class="small"><?= number_format($row['impresiones_color']) ?></td>
-                <td class="small fw-bold text-primary"><?= number_format($total_general) ?></td>
+                <td class="small fw-bold table-info text-primary"><?= number_format($total_color) ?></td>
+
                 <td>
                     <div class="btn-group">
                         <a href="../../backend/crud/edit.php?id=<?= $row['id'] ?>&empresa_id=<?= $empresa_id ?>"

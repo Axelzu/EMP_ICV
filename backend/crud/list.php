@@ -26,9 +26,11 @@ $result = $stmt->get_result();
             <th class="small">Serie</th>
             <th class="small">Cop. B/N</th>
             <th class="small">Imp. B/N</th>
-            <th class="small text-warning">TOTAL B/N</th> <th class="small">Cop. Col</th>
+            <th class="small">Cop. Col</th>
             <th class="small">Imp. Col</th>
-            <th class="small text-info">TOTAL COL</th> <th class="small">Acciones</th>
+            <th class="small text-warning">TOTAL B/N</th> 
+            <th class="small text-info">TOTAL COL</th> 
+            <th class="small">Acciones</th>
         </tr>
     </thead>
 
@@ -45,10 +47,10 @@ $result = $stmt->get_result();
                 
                 <td class="small"><?= number_format($row['copias_bn']) ?></td>
                 <td class="small"><?= number_format($row['impresiones_bn']) ?></td>
-                <td class="small fw-bold table-secondary"><?= number_format($total_bn) ?></td>
-
                 <td class="small"><?= number_format($row['copias_color']) ?></td>
                 <td class="small"><?= number_format($row['impresiones_color']) ?></td>
+
+                <td class="small fw-bold table-secondary"><?= number_format($total_bn) ?></td>
                 <td class="small fw-bold table-info text-primary"><?= number_format($total_color) ?></td>
 
                 <td>

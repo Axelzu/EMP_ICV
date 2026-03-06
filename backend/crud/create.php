@@ -7,6 +7,19 @@ $empresa_id = $_GET['empresa_id'] ?? null;
 if (!$empresa_id) {
     die("Empresa no seleccionada");
 }
+
+// 1. Buscamos los equipos registrados para esta empresa
+// Usamos DISTINCT por si hay varios registros de la misma máquina, solo mostrar una fila por serie
+$sql_equipos = "SELECT dependencia, marca_modelo, serie 
+                FROM impresoras_formulario 
+                WHERE empresa_id = ? 
+                GROUP BY serie 
+                ORDER BY dependencia ASC";
+                
+$stmt_eq = $conn->prepare($sql_equipos);
+$stmt_eq->bind_param("i", $empresa_id);
+$stmt_eq->execute();
+$equipos = $stmt_eq->get_result();
 ?>
 
 <!DOCTYPE html>
@@ -14,7 +27,7 @@ if (!$empresa_id) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registrar Copiadora | ICV</title>
+    <title>Registro de Lecturas | ICV</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../../frontend/assets/css/custom.css">
     <style>
@@ -24,14 +37,31 @@ if (!$empresa_id) {
             height: 100%;
             background-color: #f8f9fa;
             z-index: -1;
-            top: 0;
-            left: 0;
+            top: 0; left: 0;
         }
-        .form-card {
+        .form-card-wide {
             z-index: 10;
-            background-color: rgba(255, 255, 255, 0.9) !important;
+            background-color: rgba(255, 255, 255, 0.98) !important;
             border-radius: 15px;
-            width: 500px; /* Un poco más ancho para los contadores */
+            width: 95%;
+            max-width: 1200px;
+            border-top: 5px solid #dc3545; /* Detalle rojo */
+        }
+        /* Celdas estáticas grisadas */
+        .static-cell {
+            background-color: #f1f3f5 !important;
+            color: #495057;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .input-number-icv {
+            border: 1px solid #ced4da;
+            text-align: center;
+            font-weight: bold;
+        }
+        .input-number-icv:focus {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
         }
     </style>
 </head>
@@ -43,96 +73,109 @@ if (!$empresa_id) {
 <nav class="navbar navbar-dark px-4" style="background-color: #0A2540;">
     <a class="navbar-brand d-flex align-items-center" href="../../frontend/pages/inicio.php">
         <img src="../../frontend/assets/images/foto.png" width="40" class="me-2">
-        ICV - Gestión
+        ICV - PANEL TÉCNICO
     </a>
 </nav>
 
 <main class="flex-grow-1 d-flex align-items-center justify-content-center py-4">
-    <div class="card shadow form-card">
+    <div class="card shadow form-card-wide">
         <div class="card-body p-4">
-            <h4 class="text-center text-primary mb-4">➕ Registrar Copiadora</h4>
+            <h4 class="text-center text-danger fw-bold mb-4">📝 INGRESO DE CONTADORES</h4>
 
-            <form action="store.php" method="POST">
+            <form action="store_masivo.php" method="POST">
                 <input type="hidden" name="csrf_token" value="<?= generarTokenCSRF(); ?>">
                 <input type="hidden" name="empresa_id" value="<?= htmlspecialchars($empresa_id) ?>">
 
-                <div class="mb-3">
-                    <label class="form-label fw-bold small">Departamento / Dependencia</label>
-                    <input type="text" name="dependencia" class="form-control" placeholder="Ej: Contabilidad" required>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label fw-bold small">Marca y Modelo</label>
-                    <input type="text" name="marca_modelo" class="form-control" placeholder="Ej: Ricoh MP 301" required>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label fw-bold small">Número de Serie</label>
-                    <input type="text" name="serie" class="form-control" placeholder="Serie del equipo" required>
-                </div>
-
-                <div class="row g-2 mb-3">
-                    <div class="col-6">
-                        <label class="form-label fw-bold small">Fecha Inicial</label>
+                <div class="row g-3 mb-4 justify-content-center">
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-secondary">FECHA INICIAL</label>
                         <input type="date" name="fecha_inicial" class="form-control" required>
                     </div>
-                    <div class="col-6">
-                        <label class="form-label fw-bold small">Fecha Final</label>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-secondary">FECHA FINAL</label>
                         <input type="date" name="fecha_final" class="form-control" required>
                     </div>
                 </div>
 
-                <hr>
-                <h6 class="text-primary fw-bold mb-3">🔢 Lectura de Copias e impresiones</h6>
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle">
+                        <thead class="table-dark text-center">
+                            <tr class="small">
+                                <th width="20%">DEPENDENCIA</th>
+                                <th width="20%">MARCA / MODELO</th>
+                                <th width="15%">SERIE</th>
+                                <th class="table-danger text-dark">COP. B/N</th>
+                                <th class="table-danger text-dark">IMP. B/N</th>
+                                <th class="table-primary text-dark">COP. COL</th>
+                                <th class="table-primary text-dark">IMP. COL</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php 
+                            $i = 0;
+                            if ($equipos->num_rows > 0): 
+                                while ($row = $equipos->fetch_assoc()): 
+                            ?>
+                                <tr>
+                                    <td class="static-cell"><?= htmlspecialchars($row['dependencia']) ?></td>
+                                    <td class="static-cell"><?= htmlspecialchars($row['marca_modelo']) ?></td>
+                                    <td class="static-cell"><?= htmlspecialchars($row['serie']) ?></td>
 
-                <div class="row g-2">
-                    <div class="col-6">
-                        <label class="small fw-bold">Copias B/N</label>
-                        <input type="number" name="copias_bn" class="form-control" value="0">
-                    </div>
-                    <div class="col-6">
-                        <label class="small fw-bold">Copias Color</label>
-                        <input type="number" name="copias_color" class="form-control" value="0">
-                    </div>
-                    <div class="col-6">
-                        <label class="small fw-bold">Impresiones B/N</label>
-                        <input type="number" name="impresiones_bn" class="form-control" value="0">
-                    </div>
-                    <div class="col-6">
-                        <label class="small fw-bold">Impresiones Color</label>
-                        <input type="number" name="impresiones_color" class="form-control" value="0">
-                    </div>
+                                    <input type="hidden" name="equipos[<?= $i ?>][dependencia]" value="<?= $row['dependencia'] ?>">
+                                    <input type="hidden" name="equipos[<?= $i ?>][marca_modelo]" value="<?= $row['marca_modelo'] ?>">
+                                    <input type="hidden" name="equipos[<?= $i ?>][serie]" value="<?= $row['serie'] ?>">
+
+                                    <td>
+                                        <input type="number" name="equipos[<?= $i ?>][copias_bn]" class="form-control form-control-sm input-number-icv" value="0" min="0">
+                                    </td>
+                                    <td>
+                                        <input type="number" name="equipos[<?= $i ?>][impresiones_bn]" class="form-control form-control-sm input-number-icv" value="0" min="0">
+                                    </td>
+                                    <td>
+                                        <input type="number" name="equipos[<?= $i ?>][copias_color]" class="form-control form-control-sm input-number-icv" value="0" min="0">
+                                    </td>
+                                    <td>
+                                        <input type="number" name="equipos[<?= $i ?>][impresiones_color]" class="form-control form-control-sm input-number-icv" value="0" min="0">
+                                    </td>
+                                </tr>
+                            <?php 
+                                $i++;
+                                endwhile; 
+                            else: 
+                            ?>
+                                <tr>
+                                    <td colspan="7" class="text-center p-4">
+                                        <span class="text-muted">No hay equipos registrados para este cliente.</span>
+                                    </td>
+                                </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
                 </div>
 
                 <div class="d-flex justify-content-between mt-4">
-                    <a href="../../frontend/pages/empresa.php?empresa_id=<?= $empresa_id ?>" class="btn btn-secondary">⬅ Cancelar</a>
-                    <button type="submit" class="btn btn-info text-white shadow-sm">💾 Guardar</button>
-                </div>a
+                    <a href="../../frontend/pages/empresa.php?empresa_id=<?= $empresa_id ?>" class="btn btn-secondary">⬅ Volver</a>
+                    <?php if ($i > 0): ?>
+                        <button type="submit" class="btn btn-danger px-5 shadow fw-bold">💾 GUARDAR TODAS LAS LECTURAS</button>
+                    <?php endif; ?>
+                </div>
             </form>
         </div>
     </div>
 </main>
 
-<footer class="text-white text-center py-3 mt-auto" style="background-color: #0A2540;">
-    <small>© 2026 ICV - Gestión de Equipos</small>
-</footer>
-
 <script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
 <script>
     particlesJS("particles-js", {
         "particles": {
-            "number": { "value": 80, "density": { "enable": true, "value_area": 800 } },
+            "number": { "value": 50 },
             "color": { "value": "#0A2540" },
             "shape": { "type": "circle" },
-            "opacity": { "value": 0.5 },
+            "opacity": { "value": 0.3 },
             "size": { "value": 3 },
-            "line_linked": { "enable": true, "distance": 150, "color": "#0A2540", "opacity": 0.4, "width": 1 },
-            "move": { "enable": true, "speed": 3 }
-        },
-        "interactivity": {
-            "events": { "onhover": { "enable": true, "mode": "grab" } }
-        },
-        "retina_detect": true
+            "line_linked": { "enable": true, "distance": 150, "color": "#0A2540", "opacity": 0.2, "width": 1 },
+            "move": { "enable": true, "speed": 2 }
+        }
     });
 </script>
 

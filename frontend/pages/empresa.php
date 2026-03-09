@@ -15,7 +15,7 @@ $empresa = $stmt->get_result()->fetch_assoc();
 
 if (!$empresa) { die("Empresa no encontrada"); }
 
-// 2. Obtener TODAS las máquinas de esta empresa para crear los cuadros
+// 2. Intentar obtener máquinas. Si la tabla está vacía, no se romperá la página.
 $sql_maq = "SELECT dependencia, marca_modelo, serie FROM impresoras_formulario WHERE empresa_id = ? GROUP BY serie ORDER BY dependencia ASC";
 $stmt_maq = $conn->prepare($sql_maq);
 $stmt_maq->bind_param("i", $empresa_id);
@@ -41,14 +41,11 @@ $maquinas = $stmt_maq->get_result();
         .custom-card-btn:hover {
             transform: translateY(-10px);
             box-shadow: 0 10px 20px rgba(220, 53, 69, 0.3) !important;
-            background-color: #fff5f5;
         }
         .card-icon { width: 60px; height: 60px; object-fit: contain; margin-bottom: 10px; }
         #particles-js { position: fixed; width: 100%; height: 100%; z-index: -1; top: 0; left: 0; }
-        .badge-serie { background-color: #0A2540; font-size: 0.7rem; }
     </style>
 </head>
-
 <body class="d-flex flex-column min-vh-100 bg-light">
 <div id="particles-js"></div>
 
@@ -62,11 +59,17 @@ $maquinas = $stmt_maq->get_result();
 <main class="container-fluid px-4 my-5 flex-grow-1">
     <div class="text-center mb-5">
         <h2 class="fw-bold text-primary"><?= strtoupper(htmlspecialchars($empresa['nombre'])) ?></h2>
-        <p class="text-muted">Seleccione el departamento para registrar lectura</p>
+        <p class="text-muted">Gestión de Lecturas y Equipos</p>
+    </div>
+
+    <div class="d-flex justify-content-center mb-5">
+        <a href="../../backend/crud/create.php?empresa_id=<?= $empresa_id ?>" class="btn btn-info text-white shadow">
+            ➕ Registrar Nueva Máquina / Lectura
+        </a>
     </div>
 
     <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4 mb-5">
-        <?php if ($maquinas->num_rows > 0): ?>
+        <?php if ($maquinas && $maquinas->num_rows > 0): ?>
             <?php while($m = $maquinas->fetch_assoc()): ?>
                 <div class="col">
                     <a href="../../backend/crud/create.php?empresa_id=<?= $empresa_id ?>&serie=<?= urlencode($m['serie']) ?>" class="text-decoration-none text-center">
@@ -75,22 +78,15 @@ $maquinas = $stmt_maq->get_result();
                                 <img src="../assets/images/lectura.png" class="card-icon">
                                 <h6 class="fw-bold text-danger mb-1"><?= strtoupper(htmlspecialchars($m['dependencia'])) ?></h6>
                                 <small class="text-dark d-block"><?= htmlspecialchars($m['marca_modelo']) ?></small>
-                                <span class="badge badge-serie mt-2">S/N: <?= htmlspecialchars($m['serie']) ?></span>
+                                <span class="badge bg-dark mt-2">S/N: <?= htmlspecialchars($m['serie']) ?></span>
                             </div>
                         </div>
                     </a>
                 </div>
             <?php endwhile; ?>
-        <?php else: ?>
-            <div class="col-12 text-center">
-                <div class="alert alert-info">No hay equipos registrados. Use el botón de "Registrar Nueva Lectura" general.</div>
-            </div>
         <?php endif; ?>
     </div>
 
-    <div class="text-center mb-3">
-        <h5 class="fw-bold text-secondary border-bottom d-inline-block pb-2">📄 HISTORIAL RECIENTE</h5>
-    </div>
     <div class="card shadow border-0" style="border-radius: 15px; overflow: hidden;">
         <div class="card-body p-0">
             <?php include "../../backend/crud/list.php"; ?>
@@ -101,7 +97,7 @@ $maquinas = $stmt_maq->get_result();
 <script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
 <script>
 particlesJS("particles-js", {
-    particles: { number: { value: 50 }, color: { value: "#0A2540" }, opacity: { value: 0.2 }, size: { value: 3 }, line_linked: { enable: true, color: "#0A2540" }, move: { speed: 1.5 } }
+    particles: { number: { value: 40 }, color: { value: "#0A2540" }, opacity: { value: 0.2 }, size: { value: 3 }, line_linked: { enable: true, color: "#0A2540" }, move: { speed: 1.5 } }
 });
 </script>
 </body>

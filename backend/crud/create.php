@@ -5,10 +5,10 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/backend/security/functions.php';
 
 $empresa_id = $_GET['empresa_id'] ?? null;
 if (!$empresa_id) {
-    die("Empresa no seleccionada");
+    die("Error: Empresa no seleccionada");
 }
 
-// Buscamos los equipos únicos de esta empresa
+// 1. Buscamos los equipos registrados para que el técnico elija UNO
 $sql_equipos = "SELECT dependencia, marca_modelo, serie 
                 FROM impresoras_formulario 
                 WHERE empresa_id = ? 
@@ -26,86 +26,115 @@ $equipos = $stmt_eq->get_result();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro de Lecturas | ICV</title>
+    <title>Registrar Lectura | ICV</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background-color: #f8f9fa; }
-        .form-card-wide { border-radius: 15px; border-top: 5px solid #dc3545; background: white; }
-        .static-cell { background-color: #f1f3f5 !important; font-size: 0.85rem; font-weight: 600; }
-        .input-number-icv { text-align: center; font-weight: bold; width: 100px; }
+        .form-card { max-width: 600px; margin: 50px auto; border-radius: 15px; border-top: 5px solid #dc3545; }
+        .static-info { background-color: #e9ecef; padding: 15px; border-radius: 10px; margin-bottom: 20px; border-left: 5px solid #0A2540; }
     </style>
 </head>
-<body class="py-4">
+<body>
 
-<div class="container-fluid px-4">
-    <div class="card shadow form-card-wide">
+<div class="container">
+    <div class="card shadow form-card">
         <div class="card-body p-4">
-            <h4 class="text-center text-danger fw-bold mb-4">📝 INGRESO DE CONTADORES</h4>
-            
-            <p class="text-center text-muted small">Ingrese las fechas y luego guarde el equipo correspondiente.</p>
+            <h4 class="text-center text-primary mb-4">➕ NUEVA LECTURA</h4>
 
-            <div class="table-responsive">
-                <table class="table table-bordered align-middle text-center">
-                    <thead class="table-dark small">
-                        <tr>
-                            <th>DEPENDENCIA</th>
-                            <th>MARCA / MODELO</th>
-                            <th>SERIE</th>
-                            <th>FECHA INICIAL / FINAL</th>
-                            <th class="table-danger text-dark">B/N (COP/IMP)</th>
-                            <th class="table-primary text-dark">COL (COP/IMP)</th>
-                            <th>ACCIÓN</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if ($equipos->num_rows > 0): ?>
-                            <?php while ($row = $equipos->fetch_assoc()): ?>
-                                <form action="store.php" method="POST">
-                                    <input type="hidden" name="csrf_token" value="<?= generarTokenCSRF(); ?>">
-                                    <input type="hidden" name="empresa_id" value="<?= htmlspecialchars($empresa_id) ?>">
-                                    <input type="hidden" name="dependencia" value="<?= htmlspecialchars($row['dependencia']) ?>">
-                                    <input type="hidden" name="marca_modelo" value="<?= htmlspecialchars($row['marca_modelo']) ?>">
-                                    <input type="hidden" name="serie" value="<?= htmlspecialchars($row['serie']) ?>">
+            <form action="store.php" method="POST">
+                <input type="hidden" name="csrf_token" value="<?= generarTokenCSRF(); ?>">
+                <input type="hidden" name="empresa_id" value="<?= htmlspecialchars($empresa_id) ?>">
 
-                                    <tr>
-                                        <td class="static-cell"><?= htmlspecialchars($row['dependencia']) ?></td>
-                                        <td class="static-cell"><?= htmlspecialchars($row['marca_modelo']) ?></td>
-                                        <td class="static-cell small"><?= htmlspecialchars($row['serie']) ?></td>
-                                        
-                                        <td>
-                                            <input type="date" name="fecha_inicial" class="form-control form-control-sm mb-1" required>
-                                            <input type="date" name="fecha_final" class="form-control form-control-sm" required>
-                                        </td>
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Seleccione el Equipo</label>
+                    <select id="selector_equipo" class="form-select form-select-lg border-danger" onchange="actualizarDatos()" required>
+                        <option value="">-- Seleccione una máquina --</option>
+                        <?php while ($row = $equipos->fetch_assoc()): ?>
+                            <option value="<?= htmlspecialchars($row['serie']) ?>" 
+                                    data-dep="<?= htmlspecialchars($row['dependencia']) ?>" 
+                                    data-mod="<?= htmlspecialchars($row['marca_modelo']) ?>">
+                                <?= htmlspecialchars($row['dependencia']) ?> - <?= htmlspecialchars($row['serie']) ?>
+                            </option>
+                        <?php endwhile; ?>
+                    </select>
+                </div>
 
-                                        <td>
-                                            <input type="number" name="copias_bn" class="form-control form-control-sm input-number-icv mb-1" value="0" placeholder="Cop">
-                                            <input type="number" name="impresiones_bn" class="form-control form-control-sm input-number-icv" value="0" placeholder="Imp">
-                                        </td>
+                <div class="static-info">
+                    <p class="mb-1 small text-muted">Información del Equipo:</p>
+                    <div id="display_info"><strong>Seleccione un equipo para ver los detalles...</strong></div>
+                    
+                    <input type="hidden" name="dependencia" id="hidden_dep">
+                    <input type="hidden" name="marca_modelo" id="hidden_mod">
+                    <input type="hidden" name="serie" id="hidden_ser">
+                </div>
 
-                                        <td>
-                                            <input type="number" name="copias_color" class="form-control form-control-sm input-number-icv mb-1" value="0" placeholder="Cop">
-                                            <input type="number" name="impresiones_color" class="form-control form-control-sm input-number-icv" value="0" placeholder="Imp">
-                                        </td>
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label class="small fw-bold">Fecha Inicial</label>
+                        <input type="date" name="fecha_inicial" class="form-control" required>
+                    </div>
+                    <div class="col-6">
+                        <label class="small fw-bold">Fecha Final</label>
+                        <input type="date" name="fecha_final" class="form-control" required>
+                    </div>
+                </div>
 
-                                        <td>
-                                            <button type="submit" class="btn btn-sm btn-danger shadow-sm fw-bold">💾 GUARDAR</button>
-                                        </td>
-                                    </tr>
-                                </form>
-                            <?php endwhile; ?>
-                        <?php else: ?>
-                            <tr><td colspan="7" class="p-4 text-muted">No hay equipos registrados.</td></tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
+                <hr>
+                <h6 class="fw-bold text-danger">🔢 CONTADORES</h6>
+                <div class="row g-2">
+                    <div class="col-6 mb-2">
+                        <label class="small">Copias B/N</label>
+                        <input type="number" name="copias_bn" class="form-control" value="0">
+                    </div>
+                    <div class="col-6 mb-2">
+                        <label class="small">Copias Color</label>
+                        <input type="number" name="copias_color" class="form-control" value="0">
+                    </div>
+                    <div class="col-6">
+                        <label class="small">Impresiones B/N</label>
+                        <input type="number" name="impresiones_bn" class="form-control" value="0">
+                    </div>
+                    <div class="col-6">
+                        <label class="small">Impresiones Color</label>
+                        <input type="number" name="impresiones_color" class="form-control" value="0">
+                    </div>
+                </div>
 
-            <div class="mt-3 text-center">
-                <a href="../../frontend/pages/empresa.php?empresa_id=<?= $empresa_id ?>" class="btn btn-secondary">⬅ Volver al Panel</a>
-            </div>
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="../../frontend/pages/empresa.php?empresa_id=<?= $empresa_id ?>" class="btn btn-secondary">⬅ Volver</a>
+                    <button type="submit" class="btn btn-danger px-4 shadow">💾 GUARDAR LECTURA</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
+
+<script>
+function actualizarDatos() {
+    const select = document.getElementById('selector_equipo');
+    const option = select.options[select.selectedIndex];
+    
+    if (option.value !== "") {
+        const dep = option.getAttribute('data-dep');
+        const mod = option.getAttribute('data-mod');
+        const ser = option.value;
+
+        // Mostrar al usuario
+        document.getElementById('display_info').innerHTML = `
+            <b>Depto:</b> ${dep} <br>
+            <b>Modelo:</b> ${mod} <br>
+            <b>Serie:</b> ${ser}
+        `;
+
+        // Llenar los campos ocultos para el store.php
+        document.getElementById('hidden_dep').value = dep;
+        document.getElementById('hidden_mod').value = mod;
+        document.getElementById('hidden_ser').value = ser;
+    } else {
+        document.getElementById('display_info').innerHTML = "Seleccione un equipo...";
+    }
+}
+</script>
 
 </body>
 </html>

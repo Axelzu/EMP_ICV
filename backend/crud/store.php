@@ -37,7 +37,6 @@ $sql = "INSERT INTO impresoras_formulario
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 $stmt = $conn->prepare($sql);
-// i=int, s=string. Total: 10 parámetros
 $stmt->bind_param("isssiiiiss", $empresa_id, $dependencia, $marca_modelo, $serie, $c_bn, $c_col, $i_bn, $i_col, $f_ini, $f_fin);
 
 if ($stmt->execute()) {
@@ -55,7 +54,6 @@ if ($stmt->execute()) {
     $nombreLimpio = str_replace([' ', '.', ','], '_', $nombreOriginal);
     $fechaHora = date('d_m_y_H_i');
 
-    // Ejemplo: Empresa_Cliente_06_03_26_12_05.xlsx
     $nombreExcel = $nombreLimpio . "_" . $fechaHora . ".xlsx";
 
     // 3. ACTUALIZAR EL REGISTRO CON EL NOMBRE DEL ARCHIVO GENERADO
@@ -71,7 +69,7 @@ if ($stmt->execute()) {
     $subtotal_color = $c_col + $i_col;
     $total_general  = $subtotal_bn + $subtotal_color;
 
-    // 5. Preparar datos para generar el Excel (Totales al final de la fila)
+    // 5. Preparar datos para generar el Excel
     $datos = [[
         'ID'            => $id_impresora, 
         'DEPTO'         => $dependencia,
@@ -83,20 +81,17 @@ if ($stmt->execute()) {
         'IMP B/N'       => $i_bn,
         'COP COL'       => $c_col,
         'IMP COL'       => $i_col,
-        'TOTAL B/N'     => $subtotal_bn,    // Total Blanco y Negro
-        'TOTAL COL'     => $subtotal_color, // Total Color
-        'TOTAL GENERAL' => $total_general   // Suma de ambos
+        'TOTAL B/N'     => $subtotal_bn,
+        'TOTAL COL'     => $subtotal_color,
+        'TOTAL GENERAL' => $total_general
     ]];
     
-    // Ruta física en el servidor cPanel
     $rutaPublica = $_SERVER['DOCUMENT_ROOT'] . "/exports/" . $nombreExcel;
 
-    // Ejecutar la función de creación de Excel definida en excel.php
     if (function_exists('generarExcel')) {
         generarExcel($datos, $rutaPublica);
     }
 
-    // Redirección con mensaje de éxito
     header("Location: ../../frontend/pages/empresa.php?empresa_id=$empresa_id&status=success");
     exit;
 

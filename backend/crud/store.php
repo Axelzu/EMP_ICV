@@ -31,37 +31,34 @@ if (!$empresa_id || empty($marca_modelo) || empty($serie)) {
     die("Error: Faltan datos obligatorios (Empresa, Modelo o Serie).");
 }
 
-// 1. Guardar en Base de Datos (Usando tus nombres exactos de columnas)
+// 1. Obtener nombre de la empresa para el nombre del archivo Excel ANTES de guardar
+$sql_emp = "SELECT nombre FROM empresas WHERE id = ?"; 
+$stmt_emp = $conn->prepare($sql_emp);
+$stmt_emp->bind_param("i", $empresa_id);
+$stmt_emp->execute();
+$res_emp = $stmt_emp->get_result();
+$emp_data = $res_emp->fetch_assoc();
+
+$nombreOriginal = $emp_data['nombre'] ?? 'Empresa';
+$nombreLimpio = str_replace([' ', '.', ','], '_', $nombreOriginal);
+$fechaHora = date('d_m_y_H_i');
+
+// Generamos el nombre del archivo (Ej: Clinica_09_03_26_10_30.xlsx)
+$nombreExcel = $nombreLimpio . "_" . $fechaHora . ".xlsx";
+
+// 2. Guardar en Base de Datos (Incluyendo ya el nombre_archivo)
 $sql = "INSERT INTO impresoras_formulario 
-        (empresa_id, dependencia, marca_modelo, serie, copias_bn, copias_color, impresiones_bn, impresiones_color, contador_fecha_inicial, contador_fecha_final) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        (empresa_id, dependencia, marca_modelo, serie, copias_bn, copias_color, impresiones_bn, impresiones_color, contador_fecha_inicial, contador_fecha_final, nombre_archivo) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("isssiiiiss", $empresa_id, $dependencia, $marca_modelo, $serie, $c_bn, $c_col, $i_bn, $i_col, $f_ini, $f_fin);
+// i=int, s=string. Total: 11 parámetros
+$stmt->bind_param("isssiiiisss", $empresa_id, $dependencia, $marca_modelo, $serie, $c_bn, $c_col, $i_bn, $i_col, $f_ini, $f_fin, $nombreExcel);
 
 if ($stmt->execute()) {
     $id_impresora = $conn->insert_id;
 
-    // 2. Obtener nombre de la empresa para el nombre del archivo Excel
-    $sql_emp = "SELECT nombre FROM empresas WHERE id = ?"; 
-    $stmt_emp = $conn->prepare($sql_emp);
-    $stmt_emp->bind_param("i", $empresa_id);
-    $stmt_emp->execute();
-    $res_emp = $stmt_emp->get_result();
-    $emp_data = $res_emp->fetch_assoc();
-    
-    $nombreOriginal = $emp_data['nombre'] ?? 'Empresa';
-    $nombreLimpio = str_replace([' ', '.', ','], '_', $nombreOriginal);
-    $fechaHora = date('d_m_y_H_i');
-
-    $nombreExcel = $nombreLimpio . "_" . $fechaHora . ".xlsx";
-
-    // 3. ACTUALIZAR EL REGISTRO CON EL NOMBRE DEL ARCHIVO GENERADO
-    $upd = $conn->prepare("UPDATE impresoras_formulario SET nombre_archivo = ? WHERE id = ?");
-    $upd->bind_param("si", $nombreExcel, $id_impresora);
-    $upd->execute();
-
-    // 4. Registrar en el Log del sistema
+    // 3. Registrar en el Log del sistema
     registrarLog($conn, "REGISTRO", "Se creó copiadora $marca_modelo para empresa $empresa_id");
 
     // --- CÁLCULO DE TOTALES PARA EL REPORTE EXCEL ---
@@ -69,7 +66,7 @@ if ($stmt->execute()) {
     $subtotal_color = $c_col + $i_col;
     $total_general  = $subtotal_bn + $subtotal_color;
 
-    // 5. Preparar datos para generar el Excel
+    // 4. Preparar datos para generar el Excel
     $datos = [[
         'ID'            => $id_impresora, 
         'DEPTO'         => $dependencia,
@@ -86,12 +83,15 @@ if ($stmt->execute()) {
         'TOTAL GENERAL' => $total_general
     ]];
     
+    // Ruta física en el servidor para guardar el archivo
     $rutaPublica = $_SERVER['DOCUMENT_ROOT'] . "/exports/" . $nombreExcel;
 
+    // Generar el archivo físico usando la librería configurada
     if (function_exists('generarExcel')) {
         generarExcel($datos, $rutaPublica);
     }
 
+    // Redirección exitosa
     header("Location: ../../frontend/pages/empresa.php?empresa_id=$empresa_id&status=success");
     exit;
 

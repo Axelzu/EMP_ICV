@@ -13,10 +13,18 @@ $empresa = $stmt->get_result()->fetch_assoc();
 
 if (!$empresa) { die("Empresa no encontrada"); }
 
-// 2. BUSCAR EN LA TABLA MAESTRA DE EQUIPOS
-$sql_maq = "SELECT dependencia, marca_modelo, serie FROM equipos WHERE empresa_id = ? ORDER BY dependencia ASC";
+// 2. BUSCAR EN LA TABLA MAESTRA Y VERIFICAR SI TIENE REGISTRO HOY
+// Usamos DATE(fecha_registro) para comparar solo el día actual
+$hoy = date('Y-m-d');
+$sql_maq = "SELECT e.dependencia, e.marca_modelo, e.serie, 
+            (SELECT COUNT(*) FROM impresoras_formulario 
+             WHERE serie = e.serie AND DATE(fecha_registro) = ?) as ya_registrado
+            FROM equipos e 
+            WHERE e.empresa_id = ? 
+            ORDER BY e.dependencia ASC";
+
 $stmt_maq = $conn->prepare($sql_maq);
-$stmt_maq->bind_param("i", $empresa_id);
+$stmt_maq->bind_param("si", $hoy, $empresa_id);
 $stmt_maq->execute();
 $maquinas = $stmt_maq->get_result();
 ?>
@@ -34,24 +42,38 @@ $maquinas = $stmt_maq->get_result();
             position: fixed; width: 100%; height: 100%; z-index: -1; top: 0; left: 0;
             background-color: #f8f9fa;
         }
-        /* Contenedor relativo para que los botones de acción se posicionen bien */
         .card-container {
             position: relative;
             height: 100%;
         }
+        /* ESTILO BASE */
         .custom-card-btn {
             transition: all 0.3s ease;
-            border: 2px solid #dc3545 !important;
             border-radius: 15px;
             background-color: rgba(255, 255, 255, 0.9);
             height: 100%;
             cursor: pointer;
         }
-        .custom-card-btn:hover {
+
+        /* CARD PENDIENTE (ROJO) */
+        .card-pendiente {
+            border: 2px solid #dc3545 !important;
+        }
+        .card-pendiente:hover {
             transform: translateY(-10px);
             box-shadow: 0 10px 20px rgba(220, 53, 69, 0.3) !important;
         }
-        /* Botones de Editar y Eliminar flotantes */
+
+        /* CARD COMPLETADO (VERDE) */
+        .card-completado {
+            border: 2px solid #198754 !important;
+            background-color: #f0fff4 !important; /* Un toque verde muy suave al fondo */
+        }
+        .card-completado:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(25, 135, 84, 0.3) !important;
+        }
+
         .action-overlay {
             position: absolute;
             top: 10px;
@@ -98,12 +120,17 @@ $maquinas = $stmt_maq->get_result();
 
     <div class="text-center mb-5">
         <h2 class="fw-bold text-primary"><?= strtoupper(htmlspecialchars($empresa['nombre'])) ?></h2>
-        <p class="text-muted">Seleccione un equipo para registrar lectura o gestione los equipos</p>
+        <p class="text-muted">Los equipos en <b class="text-success">Verde</b> ya tienen lectura hoy.</p>
     </div>
 
     <?php if ($maquinas->num_rows > 0): ?>
         <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4 mb-5 justify-content-center">
-            <?php while($m = $maquinas->fetch_assoc()): ?>
+            <?php while($m = $maquinas->fetch_assoc()): 
+                // Definir si está completado o pendiente
+                $esta_listo = ($m['ya_registrado'] > 0);
+                $clase_status = $esta_listo ? 'card-completado' : 'card-pendiente';
+                $texto_status = $esta_listo ? 'text-success' : 'text-danger';
+            ?>
                 <div class="col">
                     <div class="card-container">
                         <div class="action-overlay">
@@ -114,12 +141,19 @@ $maquinas = $stmt_maq->get_result();
                         </div>
 
                         <a href="../../backend/crud/create.php?empresa_id=<?= $empresa_id ?>&serie=<?= urlencode($m['serie']) ?>" class="text-decoration-none text-center">
-                            <div class="card shadow-sm custom-card-btn p-3">
+                            <div class="card shadow-sm custom-card-btn p-3 <?= $clase_status ?>">
                                 <div class="card-body d-flex flex-column align-items-center">
-                                    <img src="../assets/images/lectura.png" class="card-icon">
-                                    <h6 class="fw-bold text-danger mb-1"><?= strtoupper(htmlspecialchars($m['dependencia'])) ?></h6>
+                                    <img src="../assets/images/lectura.png" class="card-icon" 
+                                         style="<?= $esta_listo ? 'filter: grayscale(100%) sepia(100%) hue-rotate(70deg) saturate(3);' : '' ?>">
+                                    
+                                    <h6 class="fw-bold <?= $texto_status ?> mb-1"><?= strtoupper(htmlspecialchars($m['dependencia'])) ?></h6>
                                     <small class="text-dark d-block"><?= htmlspecialchars($m['marca_modelo']) ?></small>
-                                    <span class="badge bg-dark mt-2">S/N: <?= htmlspecialchars($m['serie']) ?></span>
+                                    
+                                    <?php if($esta_listo): ?>
+                                        <span class="badge bg-success mt-2">✓ COMPLETADO</span>
+                                    <?php else: ?>
+                                        <span class="badge bg-dark mt-2">S/N: <?= htmlspecialchars($m['serie']) ?></span>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </a>

@@ -34,6 +34,11 @@ $maquinas = $stmt_maq->get_result();
             position: fixed; width: 100%; height: 100%; z-index: -1; top: 0; left: 0;
             background-color: #f8f9fa;
         }
+        /* Contenedor relativo para que los botones de acción se posicionen bien */
+        .card-container {
+            position: relative;
+            height: 100%;
+        }
         .custom-card-btn {
             transition: all 0.3s ease;
             border: 2px solid #dc3545 !important;
@@ -46,6 +51,27 @@ $maquinas = $stmt_maq->get_result();
             transform: translateY(-10px);
             box-shadow: 0 10px 20px rgba(220, 53, 69, 0.3) !important;
         }
+        /* Botones de Editar y Eliminar flotantes */
+        .action-overlay {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 10;
+            display: flex;
+            gap: 5px;
+        }
+        .btn-action-sm {
+            padding: 2px 6px;
+            font-size: 0.75rem;
+            border-radius: 8px;
+            text-decoration: none;
+            color: white;
+            transition: 0.2s;
+        }
+        .btn-edit-sm { background-color: #ffc107; color: #000; }
+        .btn-delete-sm { background-color: #dc3545; }
+        .btn-action-sm:hover { opacity: 0.8; color: white; }
+
         .card-icon { width: 60px; height: 60px; margin-bottom: 15px; }
         .empty-state-wrapper {
             min-height: 40vh; display: flex; align-items: center; justify-content: center;
@@ -72,23 +98,32 @@ $maquinas = $stmt_maq->get_result();
 
     <div class="text-center mb-5">
         <h2 class="fw-bold text-primary"><?= strtoupper(htmlspecialchars($empresa['nombre'])) ?></h2>
-        <p class="text-muted">Seleccione un equipo para registrar lectura</p>
+        <p class="text-muted">Seleccione un equipo para registrar lectura o gestione los equipos</p>
     </div>
 
     <?php if ($maquinas->num_rows > 0): ?>
         <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4 mb-5 justify-content-center">
             <?php while($m = $maquinas->fetch_assoc()): ?>
                 <div class="col">
-                    <a href="../../backend/crud/create.php?empresa_id=<?= $empresa_id ?>&serie=<?= urlencode($m['serie']) ?>" class="text-decoration-none text-center">
-                        <div class="card shadow-sm custom-card-btn p-3">
-                            <div class="card-body d-flex flex-column align-items-center">
-                                <img src="../assets/images/lectura.png" class="card-icon">
-                                <h6 class="fw-bold text-danger mb-1"><?= strtoupper(htmlspecialchars($m['dependencia'])) ?></h6>
-                                <small class="text-dark d-block"><?= htmlspecialchars($m['marca_modelo']) ?></small>
-                                <span class="badge bg-dark mt-2">S/N: <?= htmlspecialchars($m['serie']) ?></span>
-                            </div>
+                    <div class="card-container">
+                        <div class="action-overlay">
+                            <a href="editar_equipo.php?serie=<?= urlencode($m['serie']) ?>&empresa_id=<?= $empresa_id ?>" class="btn-action-sm btn-edit-sm" title="Editar">✏️</a>
+                            <a href="../../backend/crud/delete_equipo.php?serie=<?= urlencode($m['serie']) ?>&empresa_id=<?= $empresa_id ?>" 
+                               class="btn-action-sm btn-delete-sm" 
+                               onclick="return confirm('¿Seguro que quieres borrar este equipo?')" title="Eliminar">🗑️</a>
                         </div>
-                    </a>
+
+                        <a href="../../backend/crud/create.php?empresa_id=<?= $empresa_id ?>&serie=<?= urlencode($m['serie']) ?>" class="text-decoration-none text-center">
+                            <div class="card shadow-sm custom-card-btn p-3">
+                                <div class="card-body d-flex flex-column align-items-center">
+                                    <img src="../assets/images/lectura.png" class="card-icon">
+                                    <h6 class="fw-bold text-danger mb-1"><?= strtoupper(htmlspecialchars($m['dependencia'])) ?></h6>
+                                    <small class="text-dark d-block"><?= htmlspecialchars($m['marca_modelo']) ?></small>
+                                    <span class="badge bg-dark mt-2">S/N: <?= htmlspecialchars($m['serie']) ?></span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
                 </div>
             <?php endwhile; ?>
         </div>

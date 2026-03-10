@@ -4,18 +4,19 @@ require '../auth/guard.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/backend/security/functions.php';
 
 $empresa_id = $_GET['empresa_id'] ?? null;
-$serie_url = $_GET['serie'] ?? null; // Recibimos la serie del cuadro rojo
+$serie_url = $_GET['serie'] ?? null; // Recibimos la serie desde el cuadro rojo
 
-if (!$empresa_id) { die("Empresa no seleccionada"); }
+if (!$empresa_id) { die("Error: Empresa no seleccionada"); }
 
 $dep_f = ""; $mod_f = ""; $ser_f = "";
 
-// Si la URL trae una serie, buscamos los datos para bloquear el formulario
+// SOLUCIÓN: Buscamos los datos en la tabla maestra 'equipos'
 if ($serie_url) {
-    $stmt = $conn->prepare("SELECT dependencia, marca_modelo, serie FROM impresoras_formulario WHERE serie = ? AND empresa_id = ? LIMIT 1");
+    $stmt = $conn->prepare("SELECT dependencia, marca_modelo, serie FROM equipos WHERE serie = ? AND empresa_id = ? LIMIT 1");
     $stmt->bind_param("si", $serie_url, $empresa_id);
     $stmt->execute();
     $res = $stmt->get_result()->fetch_assoc();
+    
     if ($res) {
         $dep_f = $res['dependencia'];
         $mod_f = $res['marca_modelo'];
@@ -28,6 +29,7 @@ if ($serie_url) {
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nueva Lectura | ICV</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
@@ -43,7 +45,7 @@ if ($serie_url) {
             
             <form action="store.php" method="POST">
                 <input type="hidden" name="csrf_token" value="<?= generarTokenCSRF(); ?>">
-                <input type="hidden" name="empresa_id" value="<?= $empresa_id ?>">
+                <input type="hidden" name="empresa_id" value="<?= htmlspecialchars($empresa_id) ?>">
 
                 <div class="mb-3">
                     <label class="small fw-bold">Dependencia / Departamento</label>
@@ -59,6 +61,7 @@ if ($serie_url) {
                 </div>
 
                 <hr class="my-4">
+                
                 <div class="row g-2 mb-3 text-center">
                     <div class="col-6">
                         <label class="small fw-bold text-secondary">Fecha Inicial</label>
@@ -70,15 +73,15 @@ if ($serie_url) {
                     </div>
                 </div>
 
-                <div class="row g-3 mb-4">
-                    <div class="col-6"><label class="small">Copias B/N</label><input type="number" name="copias_bn" class="form-control" value="0"></div>
-                    <div class="col-6"><label class="small">Copias Color</label><input type="number" name="copias_color" class="form-control" value="0"></div>
-                    <div class="col-6"><label class="small">Impresiones B/N</label><input type="number" name="impresiones_bn" class="form-control" value="0"></div>
-                    <div class="col-6"><label class="small">Impresiones Color</label><input type="number" name="impresiones_color" class="form-control" value="0"></div>
+                <div class="row g-3 mb-4 text-center">
+                    <div class="col-6"><label class="small">Copias B/N</label><input type="number" name="copias_bn" class="form-control" value="0" min="0"></div>
+                    <div class="col-6"><label class="small">Copias Color</label><input type="number" name="copias_color" class="form-control" value="0" min="0"></div>
+                    <div class="col-6"><label class="small">Impresiones B/N</label><input type="number" name="impresiones_bn" class="form-control" value="0" min="0"></div>
+                    <div class="col-6"><label class="small">Impresiones Color</label><input type="number" name="impresiones_color" class="form-control" value="0" min="0"></div>
                 </div>
 
-                <div class="d-flex justify-content-between">
-                    <a href="empresa.php?empresa_id=<?= $empresa_id ?>" class="btn btn-secondary px-4">Volver</a>
+                <div class="d-flex justify-content-between pt-2">
+                    <a href="../../frontend/pages/empresa.php?empresa_id=<?= $empresa_id ?>" class="btn btn-secondary px-4">Volver</a>
                     <button type="submit" class="btn btn-danger px-4 fw-bold shadow">GUARDAR DATOS</button>
                 </div>
             </form>

@@ -3,8 +3,10 @@ require "../../backend/config/db.php";
 require "../../backend/auth/guard.php";
 
 // 🛡️ SOLO ADMINS ENTRAN AQUÍ
-if (!isset($_SESSION['user_rol']) || $_SESSION['user_rol'] !== 'admin') {
-    die("Acceso denegado.");
+// Usamos 'rol' para ser consistentes con el guard.php y login_process.php corregidos
+if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'admin') {
+    header("Location: inicio.php?error=acceso_denegado");
+    exit;
 }
 
 $usuarios = $conn->query("SELECT id, nombre, email, rol FROM users ORDER BY nombre ASC");
@@ -23,9 +25,14 @@ $usuarios = $conn->query("SELECT id, nombre, email, rol FROM users ORDER BY nomb
         body { background-color: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
         .navbar { background-color: #0A2540 !important; }
         .user-card { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        
+        /* Colores de Badges por Rol */
         .badge-admin { background-color: #0A2540; color: white; }
+        .badge-supervisor { background-color: #0dcaf0; color: #000; }
         .badge-tecnico { background-color: #6c757d; color: white; }
+        
         .avatar-circle { width: 45px; height: 45px; background: #e9ecef; display: flex; align-items: center; justify-content: center; border-radius: 50%; color: #0A2540; font-weight: bold; }
+        .dropdown-menu { border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
@@ -40,7 +47,7 @@ $usuarios = $conn->query("SELECT id, nombre, email, rol FROM users ORDER BY nomb
     
     <?php if(isset($_GET['mensaje'])): ?>
         <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="bi bi-check-circle-fill me-2"></i> Rol actualizado con éxito.
+            <i class="bi bi-check-circle-fill me-2"></i> <?= htmlspecialchars($_GET['mensaje'] == 'ok' ? 'Rol actualizado con éxito.' : $_GET['mensaje']) ?>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     <?php endif; ?>
@@ -57,7 +64,7 @@ $usuarios = $conn->query("SELECT id, nombre, email, rol FROM users ORDER BY nomb
                         <th>Usuario</th>
                         <th>Email</th>
                         <th>Rol Actual</th>
-                        <th class="text-end">Acciones</th>
+                        <th class="text-end">Cambiar Rol</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -76,24 +83,28 @@ $usuarios = $conn->query("SELECT id, nombre, email, rol FROM users ORDER BY nomb
                         </td>
                         <td><?= htmlspecialchars($user['email']) ?></td>
                         <td>
-                            <span class="badge <?= $user['rol'] === 'admin' ? 'badge-admin' : 'badge-tecnico' ?> px-3 py-2">
-                                <?= strtoupper($user['rol'] ?? 'tecnico') ?>
+                            <?php 
+                                $rol = $user['rol'] ?? 'tecnico';
+                                $badge_class = 'badge-tecnico';
+                                if($rol === 'admin') $badge_class = 'badge-admin';
+                                if($rol === 'supervisor') $badge_class = 'badge-supervisor';
+                            ?>
+                            <span class="badge <?= $badge_class ?> px-3 py-2">
+                                <?= strtoupper($rol) ?>
                             </span>
                         </td>
                         <td class="text-end">
-                            <?php if($user['rol'] === 'admin'): ?>
-                                <a href="../../backend/admin/actualizar_rol.php?id=<?= $user['id'] ?>&rol=tecnico" 
-                                   class="btn btn-outline-secondary btn-sm"
-                                   onclick="return confirm('¿Bajar a Técnico?')">
-                                    <i class="bi bi-person-down"></i> Quitar Admin
-                                </a>
-                            <?php else: ?>
-                                <a href="../../backend/admin/actualizar_rol.php?id=<?= $user['id'] ?>&rol=admin" 
-                                   class="btn btn-primary btn-sm"
-                                   onclick="return confirm('¿Hacer Administrador?')">
-                                    <i class="bi bi-person-up"></i> Hacer Admin
-                                </a>
-                            <?php endif; ?>
+                            <div class="dropdown">
+                                <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-shield-lock"></i> Gestionar
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><h6 class="dropdown-header">Asignar nuevo rol:</h6></li>
+                                    <li><a class="dropdown-item" href="../../backend/admin/actualizar_rol.php?id=<?= $user['id'] ?>&rol=admin" onclick="return confirm('¿Hacer Administrador?')"><i class="bi bi-person-fill-check text-primary"></i> Administrador</a></li>
+                                    <li><a class="dropdown-item" href="../../backend/admin/actualizar_rol.php?id=<?= $user['id'] ?>&rol=supervisor" onclick="return confirm('¿Hacer Supervisor?')"><i class="bi bi-eye-fill text-info"></i> Supervisor</a></li>
+                                    <li><a class="dropdown-item" href="../../backend/admin/actualizar_rol.php?id=<?= $user['id'] ?>&rol=tecnico" onclick="return confirm('¿Hacer Técnico?')"><i class="bi bi-person-gear text-secondary"></i> Técnico</a></li>
+                                </ul>
+                            </div>
                         </td>
                     </tr>
                     <?php endwhile; ?>

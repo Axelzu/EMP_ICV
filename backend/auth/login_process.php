@@ -1,7 +1,6 @@
 <?php
 session_start();
 require __DIR__ . "/../config/db.php";
-// Cargamos las funciones de seguridad para poder usar registrarLog
 require __DIR__ . "/../security/functions.php"; 
 
 $email    = $_POST['email'] ?? '';
@@ -19,16 +18,16 @@ if ($user = $result->fetch_assoc()) {
     if (password_verify($password, $user['password'])) {
 
         // ✅ LOGIN CORRECTO: Guardamos todo en la sesión
-        $_SESSION['user_id']    = $user['id'];     // Crítico para la tabla auditoria
-        $_SESSION['user_name']  = $user['nombre']; // Se usará en el LEFT JOIN
+        $_SESSION['user_id']   = $user['id'];
+        $_SESSION['user_name'] = $user['nombre'];
         $_SESSION['user_email'] = $user['email'];
         
-        // Si tienes una columna 'rol' en tu tabla 'users', guárdala aquí
-        // Si no la tienes aún, esto guardará NULL pero no romperá nada
-        $_SESSION['user_rol']   = $user['rol'] ?? 'admin'; 
+        // CORRECCIÓN AQUÍ: 
+        // Guardamos 'rol' y 'user_rol' para que sea compatible con todos tus archivos
+        $_SESSION['rol']      = $user['rol']; 
+        $_SESSION['user_rol'] = $user['rol']; 
 
-        // 🛡️ REGISTRAR EN AUDITORÍA EL INICIO DE SESIÓN
-        // Esto confirma que la conexión entre Login y Auditoría ya funciona
+        // 🛡️ REGISTRAR EN AUDITORÍA
         registrarLog($conn, "LOGIN", "El usuario " . $user['nombre'] . " ha iniciado sesión.");
 
         // Redirección al éxito

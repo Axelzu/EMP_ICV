@@ -4,7 +4,6 @@ require "../../backend/auth/guard.php";
 require "../../backend/config/db.php";
 
 $usuario = $_SESSION['user_name'];
-$rol_real = $_SESSION['rol'] ?? 'tecnico'; // Cambiado para que lea el rol real de la BD
 $empresas = $conn->query("SELECT * FROM empresas");
 
 // Arreglo con logos por ID de empresa
@@ -39,6 +38,7 @@ $logos = [
             margin: 0 auto 30px auto;
         }
         
+        /* ✨ SOLUCIÓN AL DETALLE VISUAL: Unificación del buscador */
         .search-wrapper {
             display: flex;
             border: 2px solid #e0e0e0;
@@ -88,17 +88,14 @@ $logos = [
 
 <div id="particles-js"></div>
 
-<nav class="navbar navbar-dark px-4 shadow-sm" style="background-color: #0A2540;">
+<nav class="navbar navbar-dark px-4 shadow-sm">
     <span class="navbar-brand fw-bold">ICV</span>
     
     <div class="d-flex gap-2">
-        <?php if ($rol_real === 'admin'): ?>
+        <?php if (isset($_SESSION['user_rol']) && $_SESSION['user_rol'] === 'admin'): ?>
             <a href="usuarios.php" class="btn btn-primary btn-sm fw-bold shadow-sm">
                 <i class="bi bi-people-fill"></i> Usuarios
             </a>
-        <?php endif; ?>
-
-        <?php if ($rol_real === 'admin' || $rol_real === 'supervisor'): ?>
             <a href="auditoria.php" class="btn btn-warning btn-sm fw-bold shadow-sm text-dark">
                 <i class="bi bi-eye-fill"></i> Monitoreo
             </a>
@@ -111,19 +108,16 @@ $logos = [
 </nav>
 
 <section class="container my-4">
-    <div class="card shadow welcome-card border-0 p-3" style="border-radius: 15px;">
+    <div class="card shadow welcome-card">
         <div class="d-flex align-items-center">
             <img src="../assets/images/user.png" width="80" class="me-3 rounded-circle border border-2 border-primary">
             <div>
-                <h5 class="mb-0 text-muted small">Bienvenido</h5>
-                <strong class="text-primary fs-5 d-block"><?= htmlspecialchars($usuario) ?></strong>
-                
-                <?php if ($rol_real === 'admin'): ?>
-                    <span class="badge bg-primary mt-1">Administrador</span>
-                <?php elseif ($rol_real === 'supervisor'): ?>
-                    <span class="badge bg-info text-dark mt-1">Supervisor</span>
+                <h5 class="mb-0">Bienvenido</h5>
+                <strong class="text-primary fs-5"><?= htmlspecialchars($usuario) ?></strong>
+                <?php if (isset($_SESSION['user_rol']) && $_SESSION['user_rol'] === 'admin'): ?>
+                    <span class="badge bg-primary d-block mt-1">Administrador</span>
                 <?php else: ?>
-                    <span class="badge bg-secondary mt-1">Técnico</span>
+                    <span class="badge bg-secondary d-block mt-1">Técnico</span>
                 <?php endif; ?>
             </div>
         </div>
@@ -132,7 +126,7 @@ $logos = [
 
 <section class="container mb-4">
     <div class="search-container">
-        <div class="search-wrapper shadow-sm">
+        <div class="search-wrapper">
             <div class="search-icon-box">
                 <i class="bi bi-search text-primary"></i>
             </div>
@@ -157,7 +151,7 @@ $logos = [
             ?>
             <div class="col-md-6 col-lg-4 tarjeta-empresa">
                 <a href="empresa.php?empresa_id=<?= $empresa['id'] ?>" class="text-decoration-none">
-                    <div class="card shadow empresa-card h-100 border-0" style="border-radius: 15px;">
+                    <div class="card shadow empresa-card h-100 border-0">
                         <div class="card-body d-flex align-items-center">
                             <img src="../assets/images/<?= $logo ?>" width="60" height="60" class="me-3 rounded-circle object-fit-cover shadow-sm">
                             <h6 class="mb-0 text-dark fw-bold nombre-empresa">
@@ -198,7 +192,11 @@ document.getElementById('inputBuscador').addEventListener('input', function(e) {
     });
 
     const mensaje = document.getElementById('mensajeVacio');
-    mensaje.style.display = (contadorResultados === 0) ? 'block' : 'none';
+    if (contadorResultados === 0) {
+        mensaje.style.display = 'block';
+    } else {
+        mensaje.style.display = 'none';
+    }
 });
 
 function limpiarBuscador() {

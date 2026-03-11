@@ -3,10 +3,8 @@ session_start();
 require "../../backend/auth/guard.php";
 require "../../backend/config/db.php";
 
-// Obtenemos datos de la sesión
-$usuario = $_SESSION['user_name'] ?? 'Usuario';
-$rol_usuario = $_SESSION['rol'] ?? 'tecnico'; // Usamos 'rol' que es lo estándar en nuestro guard.php
-
+$usuario = $_SESSION['user_name'];
+$rol_real = $_SESSION['rol'] ?? 'tecnico'; // Cambiado para que lea el rol real de la BD
 $empresas = $conn->query("SELECT * FROM empresas");
 
 // Arreglo con logos por ID de empresa
@@ -84,11 +82,6 @@ $logos = [
             border-radius: 15px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.05);
         }
-
-        #particles-js {
-            position: fixed; width: 100%; height: 100%; z-index: -1; top: 0; left: 0;
-            background-color: #f8f9fa;
-        }
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
@@ -99,13 +92,13 @@ $logos = [
     <span class="navbar-brand fw-bold">ICV</span>
     
     <div class="d-flex gap-2">
-        <?php if ($rol_usuario === 'admin'): ?>
+        <?php if ($rol_real === 'admin'): ?>
             <a href="usuarios.php" class="btn btn-primary btn-sm fw-bold shadow-sm">
                 <i class="bi bi-people-fill"></i> Usuarios
             </a>
         <?php endif; ?>
 
-        <?php if ($rol_usuario === 'admin' || $rol_usuario === 'supervisor'): ?>
+        <?php if ($rol_real === 'admin' || $rol_real === 'supervisor'): ?>
             <a href="auditoria.php" class="btn btn-warning btn-sm fw-bold shadow-sm text-dark">
                 <i class="bi bi-eye-fill"></i> Monitoreo
             </a>
@@ -117,68 +110,66 @@ $logos = [
     </div>
 </nav>
 
-<main class="flex-grow-1">
-    <section class="container my-4">
-        <div class="card shadow welcome-card border-0 p-3" style="border-radius: 15px;">
-            <div class="d-flex align-items-center">
-                <img src="../assets/images/user.png" width="80" class="me-3 rounded-circle border border-2 border-primary">
-                <div>
-                    <h5 class="mb-0">Bienvenido</h5>
-                    <strong class="text-primary fs-5"><?= htmlspecialchars($usuario) ?></strong>
-                    
-                    <?php if ($rol_usuario === 'admin'): ?>
-                        <span class="badge bg-primary d-inline-block mt-1">Administrador</span>
-                    <?php elseif ($rol_usuario === 'supervisor'): ?>
-                        <span class="badge bg-info text-dark d-inline-block mt-1">Supervisor</span>
-                    <?php else: ?>
-                        <span class="badge bg-secondary d-inline-block mt-1">Técnico</span>
-                    <?php endif; ?>
-                </div>
+<section class="container my-4">
+    <div class="card shadow welcome-card border-0 p-3" style="border-radius: 15px;">
+        <div class="d-flex align-items-center">
+            <img src="../assets/images/user.png" width="80" class="me-3 rounded-circle border border-2 border-primary">
+            <div>
+                <h5 class="mb-0 text-muted small">Bienvenido</h5>
+                <strong class="text-primary fs-5 d-block"><?= htmlspecialchars($usuario) ?></strong>
+                
+                <?php if ($rol_real === 'admin'): ?>
+                    <span class="badge bg-primary mt-1">Administrador</span>
+                <?php elseif ($rol_real === 'supervisor'): ?>
+                    <span class="badge bg-info text-dark mt-1">Supervisor</span>
+                <?php else: ?>
+                    <span class="badge bg-secondary mt-1">Técnico</span>
+                <?php endif; ?>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <section class="container mb-4">
-        <div class="search-container">
-            <div class="search-wrapper shadow-sm">
-                <div class="search-icon-box">
-                    <i class="bi bi-search text-primary"></i>
-                </div>
-                <input type="text" id="inputBuscador" class="form-control search-input" placeholder="Escribe el nombre del cliente...">
+<section class="container mb-4">
+    <div class="search-container">
+        <div class="search-wrapper shadow-sm">
+            <div class="search-icon-box">
+                <i class="bi bi-search text-primary"></i>
             </div>
+            <input type="text" id="inputBuscador" class="form-control search-input" placeholder="Escribe el nombre del cliente...">
         </div>
-    </section>
+    </div>
+</section>
 
-    <section class="container mb-5">
-        <h4 class="mb-4 text-primary fw-bold"><i class="bi bi-building me-2"></i>Nuestros Clientes</h4>
+<section class="container flex-grow-1 mb-5">
+    <h4 class="mb-4 text-primary fw-bold"><i class="bi bi-building me-2"></i>Nuestros Clientes</h4>
 
-        <div id="mensajeVacio" class="no-results-msg shadow-sm">
-            <i class="bi bi-search-heart fs-1 text-muted"></i>
-            <p class="mt-3 fs-5 text-muted">No encontramos ningún cliente que coincida con tu búsqueda.</p>
-            <button onclick="limpiarBuscador()" class="btn btn-outline-primary btn-sm">Ver todos los clientes</button>
-        </div>
+    <div id="mensajeVacio" class="no-results-msg shadow-sm">
+        <i class="bi bi-search-heart fs-1 text-muted"></i>
+        <p class="mt-3 fs-5 text-muted">No encontramos ningun cliente que coincida con tu búsqueda.</p>
+        <button onclick="limpiarBuscador()" class="btn btn-outline-primary btn-sm">Ver todos los clientes</button>
+    </div>
 
-        <div class="row g-3" id="listaEmpresas">
-            <?php while ($empresa = $empresas->fetch_assoc()): ?>
-                <?php 
-                $logo = $logos[$empresa['id']] ?? 'empresa.png';
-                ?>
-                <div class="col-md-6 col-lg-4 tarjeta-empresa">
-                    <a href="empresa.php?empresa_id=<?= $empresa['id'] ?>" class="text-decoration-none">
-                        <div class="card shadow empresa-card h-100 border-0" style="border-radius: 15px; transition: 0.3s;">
-                            <div class="card-body d-flex align-items-center">
-                                <img src="../assets/images/<?= $logo ?>" width="60" height="60" class="me-3 rounded-circle object-fit-cover shadow-sm">
-                                <h6 class="mb-0 text-dark fw-bold nombre-empresa">
-                                    <?= strtoupper(htmlspecialchars($empresa['nombre'])) ?>
-                                </h6>
-                            </div>
+    <div class="row g-3" id="listaEmpresas">
+        <?php while ($empresa = $empresas->fetch_assoc()): ?>
+            <?php 
+            $logo = $logos[$empresa['id']] ?? 'empresa.png';
+            ?>
+            <div class="col-md-6 col-lg-4 tarjeta-empresa">
+                <a href="empresa.php?empresa_id=<?= $empresa['id'] ?>" class="text-decoration-none">
+                    <div class="card shadow empresa-card h-100 border-0" style="border-radius: 15px;">
+                        <div class="card-body d-flex align-items-center">
+                            <img src="../assets/images/<?= $logo ?>" width="60" height="60" class="me-3 rounded-circle object-fit-cover shadow-sm">
+                            <h6 class="mb-0 text-dark fw-bold nombre-empresa">
+                                <?= strtoupper(htmlspecialchars($empresa['nombre'])) ?>
+                            </h6>
                         </div>
-                    </a>
-                </div>
-            <?php endwhile; ?>
-        </div>
-    </section>
-</main>
+                    </div>
+                </a>
+            </div>
+        <?php endwhile; ?>
+    </div>
+</section>
 
 <footer class="text-white text-center py-3 mt-auto" style="background-color: #0A2540;">
     <small>© 2026 ICV - Todos los derechos reservados</small>
@@ -188,7 +179,6 @@ $logos = [
 <script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
 
 <script>
-// --- BUSCADOR ---
 document.getElementById('inputBuscador').addEventListener('input', function(e) {
     let busqueda = e.target.value.toLowerCase().trim();
     let tarjetas = document.querySelectorAll('.tarjeta-empresa');
@@ -218,7 +208,6 @@ function limpiarBuscador() {
     input.focus();
 }
 
-// --- PARTÍCULAS ---
 particlesJS("particles-js", {
     particles: {
         number: { value: 60, density: { enable: true, value_area: 800 } },

@@ -3,6 +3,8 @@ require '../../backend/auth/guard.php';
 require '../../backend/config/db.php';
 
 $empresa_id = $_GET['empresa_id'] ?? null;
+$rol_usuario = $_SESSION['rol'] ?? 'tecnico'; // Obtenemos el rol de la sesión
+
 if (!$empresa_id) { die("Empresa no seleccionada"); }
 
 // 1. Obtener nombre de la empresa
@@ -14,7 +16,6 @@ $empresa = $stmt->get_result()->fetch_assoc();
 if (!$empresa) { die("Empresa no encontrada"); }
 
 // 2. BUSCAR EN LA TABLA MAESTRA Y VERIFICAR SI TIENE REGISTRO HOY
-// Usamos DATE(fecha_registro) para comparar solo el día actual
 $hoy = date('Y-m-d');
 $sql_maq = "SELECT e.dependencia, e.marca_modelo, e.serie, 
             (SELECT COUNT(*) FROM impresoras_formulario 
@@ -46,7 +47,6 @@ $maquinas = $stmt_maq->get_result();
             position: relative;
             height: 100%;
         }
-        /* ESTILO BASE */
         .custom-card-btn {
             transition: all 0.3s ease;
             border-radius: 15px;
@@ -54,26 +54,19 @@ $maquinas = $stmt_maq->get_result();
             height: 100%;
             cursor: pointer;
         }
-
-        /* CARD PENDIENTE (ROJO) */
-        .card-pendiente {
-            border: 2px solid #dc3545 !important;
-        }
+        .card-pendiente { border: 2px solid #dc3545 !important; }
         .card-pendiente:hover {
             transform: translateY(-10px);
             box-shadow: 0 10px 20px rgba(220, 53, 69, 0.3) !important;
         }
-
-        /* CARD COMPLETADO (VERDE) */
         .card-completado {
             border: 2px solid #198754 !important;
-            background-color: #f0fff4 !important; /* Un toque verde muy suave al fondo */
+            background-color: #f0fff4 !important;
         }
         .card-completado:hover {
             transform: translateY(-10px);
             box-shadow: 0 10px 20px rgba(25, 135, 84, 0.3) !important;
         }
-
         .action-overlay {
             position: absolute;
             top: 10px;
@@ -92,8 +85,6 @@ $maquinas = $stmt_maq->get_result();
         }
         .btn-edit-sm { background-color: #ffc107; color: #000; }
         .btn-delete-sm { background-color: #dc3545; }
-        .btn-action-sm:hover { opacity: 0.8; color: white; }
-
         .card-icon { width: 60px; height: 60px; margin-bottom: 15px; }
         .empty-state-wrapper {
             min-height: 40vh; display: flex; align-items: center; justify-content: center;
@@ -111,7 +102,9 @@ $maquinas = $stmt_maq->get_result();
         ICV
     </a>
     <div class="d-flex gap-2">
-        <a href="nuevo_equipo.php?empresa_id=<?= $empresa_id ?>" class="btn btn-info btn-sm text-white shadow-sm">+ Agregar Máquina</a>
+        <?php if ($rol_usuario === 'admin' || $rol_usuario === 'supervisor'): ?>
+            <a href="nuevo_equipo.php?empresa_id=<?= $empresa_id ?>" class="btn btn-info btn-sm text-white shadow-sm">+ Agregar Máquina</a>
+        <?php endif; ?>
         <a href="inicio.php" class="btn btn-outline-light btn-sm">⬅ Volver</a>
     </div>
 </nav>
@@ -126,19 +119,20 @@ $maquinas = $stmt_maq->get_result();
     <?php if ($maquinas->num_rows > 0): ?>
         <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4 mb-5 justify-content-center">
             <?php while($m = $maquinas->fetch_assoc()): 
-                // Definir si está completado o pendiente
                 $esta_listo = ($m['ya_registrado'] > 0);
                 $clase_status = $esta_listo ? 'card-completado' : 'card-pendiente';
                 $texto_status = $esta_listo ? 'text-success' : 'text-danger';
             ?>
                 <div class="col">
                     <div class="card-container">
+                        <?php if ($rol_usuario === 'admin' || $rol_usuario === 'supervisor'): ?>
                         <div class="action-overlay">
                             <a href="editar_equipo.php?serie=<?= urlencode($m['serie']) ?>&empresa_id=<?= $empresa_id ?>" class="btn-action-sm btn-edit-sm" title="Editar">✏️</a>
                             <a href="../../backend/crud/delete_equipo.php?serie=<?= urlencode($m['serie']) ?>&empresa_id=<?= $empresa_id ?>" 
                                class="btn-action-sm btn-delete-sm" 
                                onclick="return confirm('¿Seguro que quieres borrar este equipo?')" title="Eliminar">🗑️</a>
                         </div>
+                        <?php endif; ?>
 
                         <a href="../../backend/crud/create.php?empresa_id=<?= $empresa_id ?>&serie=<?= urlencode($m['serie']) ?>" class="text-decoration-none text-center">
                             <div class="card shadow-sm custom-card-btn p-3 <?= $clase_status ?>">
@@ -166,13 +160,15 @@ $maquinas = $stmt_maq->get_result();
             <div class="card p-5 shadow-sm text-center border-0" style="border-radius: 20px; max-width: 500px;">
                 <h5 class="fw-bold">No hay equipos registrados</h5>
                 <p class="text-muted">Registre la primera máquina para comenzar.</p>
-                <a href="nuevo_equipo.php?empresa_id=<?= $empresa_id ?>" class="btn btn-danger shadow px-4">Registrar Máquina</a>
+                <?php if ($rol_usuario === 'admin' || $rol_usuario === 'supervisor'): ?>
+                    <a href="nuevo_equipo.php?empresa_id=<?= $empresa_id ?>" class="btn btn-danger shadow px-4">Registrar Máquina</a>
+                <?php endif; ?>
             </div>
         </div>
     <?php endif; ?>
 
     <div class="text-center mb-3">
-        <h5 class="fw-bold text-secondary">📄 HISTORIAL DE REGISTROS</h5>
+        <h5 class="fw-bold text-secondary">HISTORIAL DE REGISTROS</h5>
     </div>
     
     <div class="table-card shadow border-0">

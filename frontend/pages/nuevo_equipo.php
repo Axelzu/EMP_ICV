@@ -44,6 +44,14 @@ $empresa = $stmt->get_result()->fetch_assoc();
                     <label class="form-label fw-bold">Número de Serie</label>
                     <input type="text" name="serie" class="form-control" required>
                 </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold" style="color: #0A2540;">Tipo de Impresión</label>
+                    <select name="tipo_color" class="form-select" style="border: 1px solid #00bcd4; border-radius: 8px;" required>
+                        <option value="" selected disabled>Seleccione una opción...</option>
+                        <option value="Blanco y Negro">⚪ Blanco y Negro (B/N)</option>
+                        <option value="Color">🌈 A Color</option>
+                    </select>
+                </div>
                 <div class="d-flex justify-content-between mt-4">
                     <a href="empresa.php?empresa_id=<?= $empresa_id ?>" class="btn btn-secondary">Volver</a>
                     <button type="submit" class="btn btn-info text-white px-4 shadow">Guardar Equipo</button>

@@ -56,7 +56,7 @@ if (!$equipo) {
             <p class="text-center text-muted small">Modifique los datos técnicos del equipo</p>
             <hr>
 
-            <form action="../../backend/equipos/update_equipo.php" method="POST">
+            <form action="../../backend/crud/update_equipo.php" method="POST">
                 <input type="hidden" name="empresa_id" value="<?= $empresa_id ?>">
                 <input type="hidden" name="serie_original" value="<?= $equipo['serie'] ?>">
 

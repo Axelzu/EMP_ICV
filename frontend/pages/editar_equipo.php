@@ -78,6 +78,14 @@ if (!$equipo) {
                            value="<?= htmlspecialchars($equipo['serie']) ?>" required>
                     <small class="text-muted">Si cambia la serie, se actualizará en los cuadros rojos.</small>
                 </div>
+                
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Tipo de Impresión</label>
+                    <select name="tipo_color" class="form-select" style="border: 1px solid #00bcd4;" required>
+                        <option value="Blanco y Negro" <?= ($eq['tipo_color'] == 'Blanco y Negro') ? 'selected' : '' ?>>⚪ Blanco y Negro</option>
+                        <option value="Color" <?= ($eq['tipo_color'] == 'Color') ? 'selected' : '' ?>>🌈 A Color</option>
+                    </select>
+                </div>
 
                 <div class="d-flex justify-content-between mt-4">
                     <a href="empresa.php?empresa_id=<?= $empresa_id ?>" class="btn btn-secondary px-4">Cancelar</a>

@@ -56,7 +56,7 @@ if (!$equipo) {
             <p class="text-center text-muted small">Modifique los datos técnicos del equipo</p>
             <hr>
 
-            <form action="../../backend/crud/update_equipo.php" method="POST">
+            <form action="../../backend/equipos/update_equipo.php" method="POST">
                 <input type="hidden" name="empresa_id" value="<?= $empresa_id ?>">
                 <input type="hidden" name="serie_original" value="<?= $equipo['serie'] ?>">
 
@@ -82,8 +82,8 @@ if (!$equipo) {
                 <div class="mb-3">
                     <label class="form-label fw-bold">Tipo de Impresión</label>
                     <select name="tipo_color" class="form-select" style="border: 1px solid #00bcd4;" required>
-                        <option value="Blanco y Negro" <?= ($eq['tipo_color'] == 'Blanco y Negro') ? 'selected' : '' ?>>⚪ Blanco y Negro</option>
-                        <option value="Color" <?= ($eq['tipo_color'] == 'Color') ? 'selected' : '' ?>>🌈 A Color</option>
+                        <option value="Blanco y Negro" <?= ($equipo['tipo_color'] == 'Blanco y Negro') ? 'selected' : '' ?>>⚪ Blanco y Negro</option>
+                        <option value="Color" <?= ($equipo['tipo_color'] == 'Color') ? 'selected' : '' ?>>🌈 A Color</option>
                     </select>
                 </div>
 

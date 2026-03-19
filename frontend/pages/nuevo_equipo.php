@@ -48,8 +48,8 @@ $empresa = $stmt->get_result()->fetch_assoc();
                     <label class="form-label fw-bold" style="color: #0A2540;">Tipo de Impresión</label>
                     <select name="tipo_color" class="form-select" style="border: 1px solid #00bcd4; border-radius: 8px;" required>
                         <option value="" selected disabled>Seleccione una opción...</option>
-                        <option value="Blanco y Negro">⚪ Blanco y Negro (B/N)</option>
-                        <option value="Color">🌈 A Color</option>
+                        <option value="Blanco y Negro">Blanco y Negro (B/N)</option>
+                        <option value="Color">A Color</option>
                     </select>
                 </div>
                 <div class="d-flex justify-content-between mt-4">

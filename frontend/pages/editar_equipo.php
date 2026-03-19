@@ -82,8 +82,8 @@ if (!$equipo) {
                 <div class="mb-3">
                     <label class="form-label fw-bold">Tipo de Impresión</label>
                     <select name="tipo_color" class="form-select" style="border: 1px solid #00bcd4;" required>
-                        <option value="Blanco y Negro" <?= ($equipo['tipo_color'] == 'Blanco y Negro') ? 'selected' : '' ?>>⚪ Blanco y Negro</option>
-                        <option value="Color" <?= ($equipo['tipo_color'] == 'Color') ? 'selected' : '' ?>>🌈 A Color</option>
+                        <option value="Blanco y Negro" <?= ($equipo['tipo_color'] == 'Blanco y Negro') ? 'selected' : '' ?>> Blanco y Negro</option>
+                        <option value="Color" <?= ($equipo['tipo_color'] == 'Color') ? 'selected' : '' ?>> Color</option>
                     </select>
                 </div>
 

@@ -15,9 +15,9 @@ $empresa = $stmt->get_result()->fetch_assoc();
 
 if (!$empresa) { die("Empresa no encontrada"); }
 
-// 2. BUSCAR EN LA TABLA MAESTRA Y VERIFICAR SI TIENE REGISTRO HOY
+// 2. BUSCAR EN LA TABLA MAESTRA Y VERIFICAR SI TIENE REGISTRO HOY (Incluimos tipo_color)
 $hoy = date('Y-m-d');
-$sql_maq = "SELECT e.dependencia, e.marca_modelo, e.serie, 
+$sql_maq = "SELECT e.dependencia, e.marca_modelo, e.serie, e.tipo_color, 
             (SELECT COUNT(*) FROM impresoras_formulario 
              WHERE serie = e.serie AND DATE(fecha_registro) = ?) as ya_registrado
             FROM equipos e 
@@ -37,6 +37,7 @@ $maquinas = $stmt_maq->get_result();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Copiadoras - <?= htmlspecialchars($empresa['nombre']) ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="../assets/css/custom.css">
     <style>
         #particles-js {
@@ -122,6 +123,7 @@ $maquinas = $stmt_maq->get_result();
                 $esta_listo = ($m['ya_registrado'] > 0);
                 $clase_status = $esta_listo ? 'card-completado' : 'card-pendiente';
                 $texto_status = $esta_listo ? 'text-success' : 'text-danger';
+                $tipo_impresion = $m['tipo_color'] ?? 'Blanco y Negro';
             ?>
                 <div class="col">
                     <div class="card-container">
@@ -143,6 +145,14 @@ $maquinas = $stmt_maq->get_result();
                                     <h6 class="fw-bold <?= $texto_status ?> mb-1"><?= strtoupper(htmlspecialchars($m['dependencia'])) ?></h6>
                                     <small class="text-dark d-block"><?= htmlspecialchars($m['marca_modelo']) ?></small>
                                     
+                                    <div class="mt-2">
+                                        <?php if ($tipo_impresion === 'Color'): ?>
+                                            <span class="badge rounded-pill bg-info text-dark" style="font-size: 0.65rem;">COLOR</span>
+                                        <?php else: ?>
+                                            <span class="badge rounded-pill bg-secondary" style="font-size: 0.65rem;">B/N</span>
+                                        <?php endif; ?>
+                                    </div>
+
                                     <?php if($esta_listo): ?>
                                         <span class="badge bg-success mt-2">✓ COMPLETADO</span>
                                     <?php else: ?>

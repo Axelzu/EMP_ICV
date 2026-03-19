@@ -117,6 +117,16 @@ $maquinas = $stmt_maq->get_result();
         <p class="text-muted">Los equipos en <b class="text-success">Verde</b> ya tienen lectura hoy.</p>
     </div>
 
+    <?php if (isset($_GET['error']) && $_GET['error'] === 'serie_duplicada'): ?>
+        <div class="container mb-4">
+            <div class="alert alert-danger alert-dismissible fade show shadow-sm text-center mx-auto" role="alert" style="max-width: 600px; border-radius: 12px;">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <strong>¡Atención!</strong> El número de serie que intentas registrar ya existe en el sistema.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    <?php endif; ?>
+
     <?php if ($maquinas->num_rows > 0): ?>
         <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4 mb-5 justify-content-center">
             <?php while($m = $maquinas->fetch_assoc()): 

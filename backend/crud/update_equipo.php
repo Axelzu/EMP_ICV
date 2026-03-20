@@ -3,15 +3,19 @@ require "../config/db.php";
 require "../auth/guard.php";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // 1. Capturamos los 5 datos que vienen del formulario
-    $emp_id = $_POST['empresa_id'];
-    $dep    = $_POST['dependencia'];
-    $mod    = $_POST['marca_modelo'];
-    $ser    = $_POST['serie'];
-    $tipo   = $_POST['tipo_color']; // El nuevo campo
+    // 1. Capturamos los datos que vienen del formulario
+    $emp_id    = $_POST['empresa_id'];
+    $dep       = $_POST['dependencia'];
+    $mod       = $_POST['marca_modelo'];
+    $ser_nueva = $_POST['serie']; // La serie que el usuario pudo haber editado
+    $ser_old   = $_POST['serie_original']; // Necesitamos la serie anterior para el WHERE
+    $tipo      = $_POST['tipo_color'];
 
-    // 2. Preparamos el SQL con 5 columnas y 5 signos de interrogación (?)
-    $sql = "INSERT INTO equipos (empresa_id, dependencia, marca_modelo, serie, tipo_color) VALUES (?, ?, ?, ?, ?)";
+    // 2. Preparamos el SQL de ACTUALIZACIÓN (UPDATE)
+    // Cambiamos los datos donde la serie coincida con la original
+    $sql = "UPDATE equipos 
+            SET dependencia = ?, marca_modelo = ?, serie = ?, tipo_color = ? 
+            WHERE serie = ? AND empresa_id = ?";
     
     $stmt = $conn->prepare($sql);
     
@@ -19,16 +23,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         die("Error en la preparación de la base de datos: " . $conn->error);
     }
 
-    // 3. Vinculamos los 5 parámetros: 1 entero (i) y 4 strings (ssss)
-    // Total: "issss" = 5 parámetros
-    $stmt->bind_param("issss", $emp_id, $dep, $mod, $ser, $tipo);
+    // 3. Vinculamos los 6 parámetros:
+    // "sssssi" -> 5 Strings (dep, mod, ser_nueva, tipo, ser_old) y 1 Entero (emp_id)
+    $stmt->bind_param("sssssi", $dep, $mod, $ser_nueva, $tipo, $ser_old, $emp_id);
 
     if ($stmt->execute()) {
-        // Si todo sale bien, regresamos a la página de la empresa
-        header("Location: ../../frontend/pages/empresa.php?empresa_id=$emp_id&msg=equipo_creado");
+        // Si todo sale bien, regresamos a la página de la empresa con mensaje de éxito
+        header("Location: ../../frontend/pages/empresa.php?empresa_id=$emp_id&status=updated");
         exit;
     } else {
-        echo "Error al registrar el equipo: " . $stmt->error;
+        echo "Error al actualizar el equipo: " . $stmt->error;
     }
 } else {
     echo "Acceso no permitido.";

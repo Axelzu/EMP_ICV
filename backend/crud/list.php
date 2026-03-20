@@ -6,8 +6,8 @@ if (!isset($empresa_id)) {
     die("Empresa no definida");
 }
 
-// Consultamos las columnas de la base de datos
-$sql = "SELECT id, dependencia, marca_modelo, serie, copias_bn, copias_color, impresiones_bn, impresiones_color 
+// Consultamos las columnas de la base de datos (Añadimos contador_fecha_final para la hora)
+$sql = "SELECT id, dependencia, marca_modelo, serie, copias_bn, copias_color, impresiones_bn, impresiones_color, contador_fecha_final 
         FROM impresoras_formulario 
         WHERE empresa_id = ? 
         ORDER BY id DESC";
@@ -30,7 +30,7 @@ $result = $stmt->get_result();
             <th class="small">Imp. Col</th>
             <th class="small text-warning">TOTAL B/N</th> 
             <th class="small text-info">TOTAL COL</th> 
-            <th class="small">Acciones</th>
+            <th class="small">Fecha/Hora</th> <th class="small">Acciones</th>
         </tr>
     </thead>
 
@@ -39,6 +39,11 @@ $result = $stmt->get_result();
             // CÁLCULO DE LOS DOS TOTALES SOLICITADOS
             $total_bn = $row['copias_bn'] + $row['impresiones_bn'];
             $total_color = $row['copias_color'] + $row['impresiones_color'];
+            
+            // Formatear la fecha para que se vea bien
+            $fecha_formateada = ($row['contador_fecha_final']) 
+                ? date('d/m/Y H:i', strtotime($row['contador_fecha_final'])) 
+                : '---';
         ?>
             <tr>
                 <td class="small fw-bold"><?= htmlspecialchars($row['dependencia']) ?></td>
@@ -52,6 +57,12 @@ $result = $stmt->get_result();
 
                 <td class="small fw-bold table-secondary"><?= number_format($total_bn) ?></td>
                 <td class="small fw-bold table-info text-primary"><?= number_format($total_color) ?></td>
+                
+                <td class="small">
+                    <span class="badge bg-light text-dark border">
+                        <?= $fecha_formateada ?>
+                    </span>
+                </td>
 
                 <td>
                     <div class="btn-group">

@@ -58,7 +58,7 @@ if (!$equipo) {
 
             <form action="../../backend/crud/update_equipo.php" method="POST">
                 <input type="hidden" name="empresa_id" value="<?= $empresa_id ?>">
-                <input type="hidden" name="serie_original" value="<?= $equipo['serie'] ?>">
+                <input type="hidden" name="serie_original" value="<?= htmlspecialchars($equipo['serie']) ?>">
 
                 <div class="mb-3">
                     <label class="form-label fw-bold">Dependencia / Departamento</label>
@@ -73,10 +73,10 @@ if (!$equipo) {
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label fw-bold">Número de Serie (Nuevo)</label>
-                    <input type="text" name="serie_nueva" class="form-control" 
+                    <label class="form-label fw-bold">Número de Serie</label>
+                    <input type="text" name="serie" class="form-control" 
                            value="<?= htmlspecialchars($equipo['serie']) ?>" required>
-                    <small class="text-muted">Si cambia la serie, se actualizará en los cuadros rojos.</small>
+                    <small class="text-muted">Si cambia la serie, se actualizará en los registros futuros.</small>
                 </div>
                 
                 <div class="mb-3">

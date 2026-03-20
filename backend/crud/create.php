@@ -62,22 +62,13 @@ if ($serie_url) {
 
                 <hr class="my-4">
                 
-                <div class="row g-2 mb-3 text-center">
-                    <div class="col-6">
-                        <label class="small fw-bold text-secondary">Fecha Inicial</label>
-                        <input type="date" name="fecha_inicial" class="form-control border-danger" required>
-                    </div>
-                    <div class="col-6">
-                        <label class="small fw-bold text-secondary">Fecha Final</label>
-                        <input type="date" name="fecha_final" class="form-control border-danger" required>
-                    </div>
-                </div>
+                <p class="text-center text-muted small">Ingrese los contadores actuales de la máquina:</p>
 
                 <div class="row g-3 mb-4 text-center">
-                    <div class="col-6"><label class="small">Copias B/N</label><input type="number" name="copias_bn" class="form-control" value="0" min="0"></div>
-                    <div class="col-6"><label class="small">Copias Color</label><input type="number" name="copias_color" class="form-control" value="0" min="0"></div>
-                    <div class="col-6"><label class="small">Impresiones B/N</label><input type="number" name="impresiones_bn" class="form-control" value="0" min="0"></div>
-                    <div class="col-6"><label class="small">Impresiones Color</label><input type="number" name="impresiones_color" class="form-control" value="0" min="0"></div>
+                    <div class="col-6"><label class="small fw-bold">Copias B/N</label><input type="number" name="copias_bn" class="form-control" value="0" min="0"></div>
+                    <div class="col-6"><label class="small fw-bold">Copias Color</label><input type="number" name="copias_color" class="form-control" value="0" min="0"></div>
+                    <div class="col-6"><label class="small fw-bold">Impresiones B/N</label><input type="number" name="impresiones_bn" class="form-control" value="0" min="0"></div>
+                    <div class="col-6"><label class="small fw-bold">Impresiones Color</label><input type="number" name="impresiones_color" class="form-control" value="0" min="0"></div>
                 </div>
 
                 <div class="d-flex justify-content-between pt-2">

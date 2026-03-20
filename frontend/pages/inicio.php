@@ -20,7 +20,8 @@ $logos = [
     7 => 'A_SJDD.png',
     8 => 'LA_Y.png',
     9 => 'HSJDD.png',
-    10 => 'F_VOZANDES.png'
+    10 => 'F_VOZANDES.png',
+    11 => 'conquito.png'
 ];
 ?>
 

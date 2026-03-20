@@ -6,8 +6,9 @@ if (!isset($empresa_id)) {
     die("Empresa no definida");
 }
 
-// Consultamos las columnas de la base de datos (Añadimos contador_fecha_final para la hora)
-$sql = "SELECT id, dependencia, marca_modelo, serie, copias_bn, copias_color, impresiones_bn, impresiones_color, contador_fecha_final 
+// Cambiamos la consulta para usar 'fecha_registro' que sí guarda la hora completa
+$sql = "SELECT id, dependencia, marca_modelo, serie, copias_bn, copias_color, 
+               impresiones_bn, impresiones_color, fecha_registro 
         FROM impresoras_formulario 
         WHERE empresa_id = ? 
         ORDER BY id DESC";
@@ -30,19 +31,19 @@ $result = $stmt->get_result();
             <th class="small">Imp. Col</th>
             <th class="small text-warning">TOTAL B/N</th> 
             <th class="small text-info">TOTAL COL</th> 
-            <th class="small">Fecha/Hora</th> <th class="small">Acciones</th>
+            <th class="small">Fecha/Hora</th>
+            <th class="small">Acciones</th>
         </tr>
     </thead>
 
     <tbody>
         <?php while ($row = $result->fetch_assoc()) { 
-            // CÁLCULO DE LOS DOS TOTALES SOLICITADOS
             $total_bn = $row['copias_bn'] + $row['impresiones_bn'];
             $total_color = $row['copias_color'] + $row['impresiones_color'];
             
-            // Formatear la fecha para que se vea bien
-            $fecha_formateada = ($row['contador_fecha_final']) 
-                ? date('d/m/Y H:i', strtotime($row['contador_fecha_final'])) 
+            // Usamos fecha_registro que contiene la hora del servidor
+            $fecha_hora = ($row['fecha_registro']) 
+                ? date('d/m/Y H:i', strtotime($row['fecha_registro'])) 
                 : '---';
         ?>
             <tr>
@@ -60,22 +61,18 @@ $result = $stmt->get_result();
                 
                 <td class="small">
                     <span class="badge bg-light text-dark border">
-                        <?= $fecha_formateada ?>
+                        <i class="bi bi-clock me-1 text-primary"></i>
+                        <?= $fecha_hora ?>
                     </span>
                 </td>
 
                 <td>
                     <div class="btn-group">
                         <a href="../../backend/crud/edit.php?id=<?= $row['id'] ?>&empresa_id=<?= $empresa_id ?>"
-                           class="btn btn-sm btn-warning">
-                           ✏️
-                        </a>
-
+                           class="btn btn-sm btn-warning">✏️</a>
                         <a href="../../backend/crud/delete.php?id=<?= $row['id'] ?>&empresa_id=<?= $empresa_id ?>"
                            class="btn btn-sm btn-danger"
-                           onclick="return confirm('¿Eliminar este registro?')">
-                           🗑️
-                        </a>
+                           onclick="return confirm('¿Eliminar este registro?')">🗑️</a>
                     </div>
                 </td>
             </tr>

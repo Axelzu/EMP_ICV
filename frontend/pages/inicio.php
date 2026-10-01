@@ -11,7 +11,7 @@ $empresas = $conn->query("SELECT * FROM empresas");
 
 // Arreglo con logos por ID de empresa
 $logos = [
-    1 => 'h_vozandes.png',
+    1 => '',
     2 => 'c_internacional.png',
     3 => 'c_cruzmedic.png',
     4 => 'empresa4.png',

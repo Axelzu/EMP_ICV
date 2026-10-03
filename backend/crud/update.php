@@ -7,6 +7,8 @@ error_reporting(E_ALL);
 require "../config/db.php";
 require "../config/excel.php";
 require "../security/functions.php"; 
+require "../auth/guard.php";
+require "../lib/lecturas.php";
 
 // 🛡️ Verificar Token CSRF para seguridad
 if (!isset($_POST['csrf_token']) || !validarTokenCSRF($_POST['csrf_token'])) {
@@ -31,6 +33,16 @@ if (!$id || !$empresa_id || !$marca_modelo || !$serie) {
     die("Error: Datos incompletos o inválidos.");
 }
 
+// RF-02: validar que el contador editado no sea menor a la lectura previa del equipo
+$equipo = equipoPorSerie($conn, $serie);
+if ($equipo) {
+    $err = validarContadorCronologico($conn, (int)$equipo['id'], $c_bn + $i_bn, $c_col + $i_col, $id);
+    if ($err) {
+        header("Location: ../../frontend/pages/empresa.php?empresa_id=$empresa_id&error=contador_menor&detalle=" . urlencode($err));
+        exit;
+    }
+}
+
 // 2. Actualizar Base de Datos (Con nombres exactos de tu tabla)
 $sql = "UPDATE impresoras_formulario SET 
         dependencia = ?, 
@@ -48,6 +60,15 @@ $stmt = $conn->prepare($sql);
 // i=int, s=string. Total: 10 parámetros
 $stmt->bind_param("sssiiiissi", $dependencia, $marca_modelo, $serie, $c_bn, $c_col, $i_bn, $i_col, $f_ini, $f_fin, $id);
 $stmt->execute();
+
+// Mantener sincronizado el historial unificado
+if ($equipo) {
+    $l_bn = $c_bn + $i_bn;
+    $l_col = $c_col + $i_col;
+    $stl = $conn->prepare("UPDATE lecturas SET contador_bn = ?, contador_color = ? WHERE formulario_id = ?");
+    $stl->bind_param("iii", $l_bn, $l_col, $id);
+    $stl->execute();
+}
 
 // Registrar la acción en el Log
 registrarLog($conn, "ACTUALIZACIÓN", "El usuario editó la copiadora ID: $id (Empresa: $empresa_id)");

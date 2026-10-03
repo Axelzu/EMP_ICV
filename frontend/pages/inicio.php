@@ -102,6 +102,16 @@ $logos = [
         <?php endif; ?>
 
         <?php if ($rol_real === 'admin' || $rol_real === 'supervisor'): ?>
+            <a href="dashboard.php" class="btn btn-success btn-sm fw-bold shadow-sm">
+                <i class="bi bi-traffic-light"></i> Panel
+            </a>
+        <?php endif; ?>
+
+        <a href="mantenimiento.php" class="btn btn-info btn-sm fw-bold shadow-sm text-white">
+            <i class="bi bi-tools"></i> Mantenimiento
+        </a>
+
+        <?php if ($rol_real === 'admin' || $rol_real === 'supervisor'): ?>
             <a href="auditoria.php" class="btn btn-warning btn-sm fw-bold shadow-sm text-dark">
                 <i class="bi bi-eye-fill"></i> Monitoreo
             </a>

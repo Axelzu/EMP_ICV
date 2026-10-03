@@ -23,14 +23,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // 2. SI NO EXISTE: Procedemos con el INSERT (tus 5 parámetros corregidos)
-    $sql = "INSERT INTO equipos (empresa_id, dependencia, marca_modelo, serie, tipo_color) VALUES (?, ?, ?, ?, ?)";
+    // qr_token: identificador único que se imprime en el código QR pegado al equipo (RF-03)
+    $sql = "INSERT INTO equipos (empresa_id, dependencia, marca_modelo, serie, tipo_color, qr_token) VALUES (?, ?, ?, ?, ?, MD5(CONCAT(?, RAND(), NOW())))";
     $stmt = $conn->prepare($sql);
     
     if (!$stmt) {
         die("Error en la preparación: " . $conn->error);
     }
 
-    $stmt->bind_param("issss", $emp_id, $dep, $mod, $ser, $tipo);
+    $stmt->bind_param("isssss", $emp_id, $dep, $mod, $ser, $tipo, $ser);
 
     if ($stmt->execute()) {
         header("Location: ../../frontend/pages/empresa.php?empresa_id=$emp_id&msg=equipo_creado");

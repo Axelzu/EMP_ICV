@@ -15,6 +15,11 @@ $result = $stmt->get_result();
 
 if ($user = $result->fetch_assoc()) {
     // 2. Verificamos la contraseña
+    if (isset($user['activo']) && (int)$user['activo'] === 0) {
+        $_SESSION['login_error'] = "Cuenta desactivada. Contacte al administrador.";
+        header("Location: /frontend/pages/login.php");
+        exit;
+    }
     if (password_verify($password, $user['password'])) {
 
         // ✅ LOGIN CORRECTO: Guardamos todo en la sesión

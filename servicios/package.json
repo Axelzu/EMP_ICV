@@ -1,0 +1,21 @@
+{
+  "name": "icv-servicios",
+  "version": "1.0.0",
+  "description": "Servicios Node.js de ICV: receptor SMTP de contadores y motor predictivo (brain.js)",
+  "private": true,
+  "scripts": {
+    "smtp": "node smtp_listener.js",
+    "ml": "node motor_predictivo.js",
+    "scheduler": "node scheduler.js",
+    "demo": "node seed_demo.js",
+    "test": "node --test test/parser.test.js test/ml.test.js"
+  },
+  "dependencies": {
+    "brain.js": "^2.0.0-beta.24",
+    "dotenv": "^18.0.5",
+    "mailparser": "^3.9.34",
+    "mysql2": "^3.24.5",
+    "nodemailer": "^10.0.14",
+    "smtp-server": "^3.19.17"
+  }
+}

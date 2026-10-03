@@ -6,6 +6,7 @@ error_reporting(E_ALL);
 require "../config/db.php";
 require "../config/excel.php";
 require "../auth/guard.php";
+require "../lib/lecturas.php";
 require_once $_SERVER['DOCUMENT_ROOT'] . '/backend/security/functions.php'; 
 
 // 🛡️ Verificar Token CSRF para seguridad
@@ -31,6 +32,16 @@ $f_actual = date('Y-m-d H:i:s');
 // Validación rápida
 if (!$empresa_id || empty($marca_modelo) || empty($serie)) {
     die("Error: Faltan datos obligatorios (Empresa, Modelo o Serie).");
+}
+
+// RF-02: el contador no puede ser menor al último registrado del equipo
+$equipo = equipoPorSerie($conn, $serie);
+if ($equipo) {
+    $err = validarContadorCronologico($conn, (int)$equipo['id'], $c_bn + $i_bn, $c_col + $i_col);
+    if ($err) {
+        header("Location: ../../frontend/pages/empresa.php?empresa_id=$empresa_id&error=contador_menor&detalle=" . urlencode($err));
+        exit;
+    }
 }
 
 // 1. Obtener nombre de la empresa para el nombre del archivo Excel
@@ -59,6 +70,16 @@ $stmt->bind_param("isssiiiisss", $empresa_id, $dependencia, $marca_modelo, $seri
 
 if ($stmt->execute()) {
     $id_impresora = $conn->insert_id;
+
+    // Historial unificado de lecturas (alimenta semáforo, informes y motor predictivo)
+    if ($equipo) {
+        $eq_id = (int)$equipo['id'];
+        $l_bn = $c_bn + $i_bn;
+        $l_col = $c_col + $i_col;
+        $stl = $conn->prepare("INSERT INTO lecturas (equipo_id, fecha, contador_bn, contador_color, origen, formulario_id) VALUES (?, ?, ?, ?, 'MANUAL', ?)");
+        $stl->bind_param("isiii", $eq_id, $f_actual, $l_bn, $l_col, $id_impresora);
+        $stl->execute();
+    }
 
     // 3. Registrar en el Log del sistema
     registrarLog($conn, "REGISTRO", "Se creó lectura para $marca_modelo (Serie: $serie) - Empresa ID: $empresa_id");

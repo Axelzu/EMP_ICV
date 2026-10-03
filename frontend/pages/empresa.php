@@ -126,6 +126,14 @@ $maquinas = $stmt_maq->get_result();
             </div>
         <?php endif; ?>
 
+        <?php if (isset($_GET['error']) && $_GET['error'] === 'contador_menor'): ?>
+            <div class="alert alert-danger alert-dismissible fade show shadow-sm text-center mx-auto" role="alert" style="max-width: 600px; border-radius: 12px;">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <strong>Lectura rechazada.</strong> <?= htmlspecialchars($_GET['detalle'] ?? 'El contador es menor al último registrado.') ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <?php endif; ?>
+
         <?php if (isset($_GET['status']) && $_GET['status'] === 'success'): ?>
             <div class="alert alert-success alert-dismissible fade show shadow-sm text-center mx-auto" role="alert" style="max-width: 600px; border-radius: 12px;">
                 <i class="bi bi-check-circle-fill me-2"></i>

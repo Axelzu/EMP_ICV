@@ -1,9 +1,11 @@
 <?php
 require '../../backend/auth/guard.php';
 require '../../backend/config/db.php';
+require '../../backend/lib/lecturas.php';
 
-$empresa_id = $_GET['empresa_id'] ?? null;
-$rol_usuario = $_SESSION['rol'] ?? 'tecnico'; // Obtenemos el rol de la sesión
+$empresa_id = (int)($_GET['empresa_id'] ?? 0);
+$rol_usuario = $_SESSION['rol'] ?? 'tecnico';
+$puede_gestionar = in_array($rol_usuario, ['admin', 'supervisor'], true);
 
 if (!$empresa_id) { die("Empresa no seleccionada"); }
 
@@ -15,19 +17,22 @@ $empresa = $stmt->get_result()->fetch_assoc();
 
 if (!$empresa) { die("Empresa no encontrada"); }
 
-// 2. BUSCAR EN LA TABLA MAESTRA Y VERIFICAR SI TIENE REGISTRO HOY (Incluimos tipo_color)
-$hoy = date('Y-m-d');
-$sql_maq = "SELECT e.dependencia, e.marca_modelo, e.serie, e.tipo_color, 
-            (SELECT COUNT(*) FROM impresoras_formulario 
-             WHERE serie = e.serie AND DATE(fecha_registro) = ?) as ya_registrado
-            FROM equipos e 
-            WHERE e.empresa_id = ? 
-            ORDER BY e.dependencia ASC";
+// 2. Periodo a consultar (por defecto el mes actual)
+$periodo = $_GET['periodo'] ?? date('Y-m');
+if (!periodoValido($periodo)) $periodo = date('Y-m');
 
-$stmt_maq = $conn->prepare($sql_maq);
-$stmt_maq->bind_param("si", $hoy, $empresa_id);
-$stmt_maq->execute();
-$maquinas = $stmt_maq->get_result();
+// 3. Estado y contadores de cada equipo del cliente en el periodo
+$equipos = estadoEquipos($conn, $periodo, $empresa_id);
+$semaforo = ['Reportado' => 'success', 'Estimado' => 'warning', 'Pendiente' => 'danger'];
+
+// 4. Últimas lecturas recibidas de los equipos del cliente
+$stmt = $conn->prepare("SELECT l.fecha, l.contador_bn, l.contador_color, l.toner_pct, l.origen, e.dependencia, e.marca_modelo, e.serie
+                        FROM lecturas l JOIN equipos e ON e.id = l.equipo_id
+                        WHERE e.empresa_id = ? AND l.origen <> 'ESTIMADO'
+                        ORDER BY l.fecha DESC, l.id DESC LIMIT 40");
+$stmt->bind_param("i", $empresa_id);
+$stmt->execute();
+$historial = $stmt->get_result();
 ?>
 
 <!DOCTYPE html>
@@ -35,7 +40,7 @@ $maquinas = $stmt_maq->get_result();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Copiadoras - <?= htmlspecialchars($empresa['nombre']) ?></title>
+    <title>Equipos - <?= htmlspecialchars($empresa['nombre']) ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="../assets/css/custom.css">
@@ -44,52 +49,10 @@ $maquinas = $stmt_maq->get_result();
             position: fixed; width: 100%; height: 100%; z-index: -1; top: 0; left: 0;
             background-color: #f8f9fa;
         }
-        .card-container {
-            position: relative;
-            height: 100%;
-        }
-        .custom-card-btn {
-            transition: all 0.3s ease;
-            border-radius: 15px;
-            background-color: rgba(255, 255, 255, 0.9);
-            height: 100%;
-            cursor: pointer;
-        }
-        .card-pendiente { border: 2px solid #dc3545 !important; }
-        .card-pendiente:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 10px 20px rgba(220, 53, 69, 0.3) !important;
-        }
-        .card-completado {
-            border: 2px solid #198754 !important;
-            background-color: #f0fff4 !important;
-        }
-        .card-completado:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 10px 20px rgba(25, 135, 84, 0.3) !important;
-        }
-        .action-overlay {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 10;
-            display: flex;
-            gap: 5px;
-        }
-        .btn-action-sm {
-            padding: 2px 6px;
-            font-size: 0.75rem;
-            border-radius: 8px;
-            text-decoration: none;
-            color: white;
-            transition: 0.2s;
-        }
-        .btn-edit-sm { background-color: #ffc107; color: #000; }
-        .btn-delete-sm { background-color: #dc3545; }
-        .card-icon { width: 60px; height: 60px; margin-bottom: 15px; }
-        .empty-state-wrapper {
-            min-height: 40vh; display: flex; align-items: center; justify-content: center;
-        }
+        .dot { display:inline-block; width:12px; height:12px; border-radius:50%; }
+        .dot-success { background:#198754; } .dot-warning { background:#ffc107; } .dot-danger { background:#dc3545; }
+        .panel { border-radius: 15px; background: rgba(255,255,255,0.95); }
+        td, th { white-space: nowrap; }
     </style>
 </head>
 
@@ -103,21 +66,34 @@ $maquinas = $stmt_maq->get_result();
         ICV
     </a>
     <div class="d-flex gap-2">
-        <?php if ($rol_usuario === 'admin' || $rol_usuario === 'supervisor'): ?>
+        <?php if ($puede_gestionar): ?>
             <a href="nuevo_equipo.php?empresa_id=<?= $empresa_id ?>" class="btn btn-info btn-sm text-white shadow-sm">+ Agregar Máquina</a>
         <?php endif; ?>
         <a href="inicio.php" class="btn btn-outline-light btn-sm">⬅ Volver</a>
     </div>
 </nav>
 
-<main class="container-fluid px-4 my-5 flex-grow-1">
+<main class="container-fluid px-4 my-4 flex-grow-1">
 
-    <div class="text-center mb-5">
-        <h2 class="fw-bold text-primary"><?= strtoupper(htmlspecialchars($empresa['nombre'])) ?></h2>
-        <p class="text-muted">Los equipos en <b class="text-success">Verde</b> ya tienen lectura hoy.</p>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold text-primary mb-0"><?= strtoupper(htmlspecialchars($empresa['nombre'])) ?></h2>
+            <p class="text-muted mb-0">Contadores recibidos automáticamente desde los equipos (SMTP).</p>
+        </div>
+        <form method="GET" class="d-flex flex-wrap gap-2 align-items-center">
+            <input type="hidden" name="empresa_id" value="<?= $empresa_id ?>">
+            <input type="month" name="periodo" value="<?= htmlspecialchars($periodo) ?>" class="form-control form-control-sm" style="width:auto">
+            <button class="btn btn-primary btn-sm">Ver</button>
+            <?php if ($puede_gestionar): ?>
+                <a class="btn btn-success btn-sm"
+                   href="../../backend/reports/consolidado.php?periodo=<?= urlencode($periodo) ?>&empresa_id=<?= $empresa_id ?>">
+                    <i class="bi bi-file-earmark-excel"></i> Descargar Excel
+                </a>
+            <?php endif; ?>
+        </form>
     </div>
 
-    <div class="container mb-4">
+    <div class="container mb-3">
         <?php if (isset($_GET['error']) && $_GET['error'] === 'serie_duplicada'): ?>
             <div class="alert alert-danger alert-dismissible fade show shadow-sm text-center mx-auto" role="alert" style="max-width: 600px; border-radius: 12px;">
                 <i class="bi bi-exclamation-triangle-fill me-2"></i>
@@ -125,113 +101,104 @@ $maquinas = $stmt_maq->get_result();
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         <?php endif; ?>
-
-        <?php if (isset($_GET['error']) && $_GET['error'] === 'contador_menor'): ?>
-            <div class="alert alert-danger alert-dismissible fade show shadow-sm text-center mx-auto" role="alert" style="max-width: 600px; border-radius: 12px;">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                <strong>Lectura rechazada.</strong> <?= htmlspecialchars($_GET['detalle'] ?? 'El contador es menor al último registrado.') ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        <?php endif; ?>
-
-        <?php if (isset($_GET['status']) && $_GET['status'] === 'success'): ?>
+        <?php if (isset($_GET['msg']) && $_GET['msg'] === 'equipo_creado'): ?>
             <div class="alert alert-success alert-dismissible fade show shadow-sm text-center mx-auto" role="alert" style="max-width: 600px; border-radius: 12px;">
-                <i class="bi bi-check-circle-fill me-2"></i>
-                <strong>¡Excelente!</strong> La lectura se ha registrado correctamente con la hora actual.
+                <i class="bi bi-check-circle-fill me-2"></i> Equipo registrado correctamente.
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         <?php endif; ?>
     </div>
 
-    <?php if ($maquinas->num_rows > 0): ?>
-        <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4 mb-5 justify-content-center">
-            <?php while($m = $maquinas->fetch_assoc()): 
-                $esta_listo = ($m['ya_registrado'] > 0);
-                $clase_status = $esta_listo ? 'card-completado' : 'card-pendiente';
-                $texto_status = $esta_listo ? 'text-success' : 'text-danger';
-                $tipo_impresion = $m['tipo_color'] ?? 'Blanco y Negro';
-            ?>
-                <div class="col">
-                    <div class="card-container">
-                        <?php if ($rol_usuario === 'admin' || $rol_usuario === 'supervisor'): ?>
-                        <div class="action-overlay">
-                            <a href="editar_equipo.php?serie=<?= urlencode($m['serie']) ?>&empresa_id=<?= $empresa_id ?>" class="btn-action-sm btn-edit-sm" title="Editar">✏️</a>
-                            <a href="../../backend/crud/delete_equipo.php?serie=<?= urlencode($m['serie']) ?>&empresa_id=<?= $empresa_id ?>" 
-                               class="btn-action-sm btn-delete-sm" 
-                               onclick="return confirm('¿Seguro que quieres borrar este equipo?')" title="Eliminar">🗑️</a>
-                        </div>
+    <div class="card panel shadow border-0 mb-4">
+        <div class="card-header bg-white fw-bold">Equipos · periodo <?= htmlspecialchars($periodo) ?></div>
+        <?php if ($equipos): ?>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 small">
+                <thead class="table-dark">
+                    <tr>
+                        <th></th><th>Dependencia</th><th>Marca / Modelo</th><th>Serie</th><th>Tipo</th><th>Estado</th>
+                        <th class="text-end">Contador B/N</th><th class="text-end">Contador Color</th><th>Última lectura</th>
+                        <?php if ($puede_gestionar): ?><th>Acciones</th><?php endif; ?>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($equipos as $e):
+                    $cls = $semaforo[$e['estado']];
+                    $bn  = $e['estado'] === 'Reportado' ? $e['real_bn'] : ($e['estado'] === 'Estimado' ? $e['contador_bn_estimado'] : null);
+                    $col = $e['estado'] === 'Reportado' ? $e['real_color'] : ($e['estado'] === 'Estimado' ? $e['contador_color_estimado'] : null);
+                ?>
+                    <tr>
+                        <td><span class="dot dot-<?= $cls ?>"></span></td>
+                        <td class="fw-bold"><?= htmlspecialchars($e['dependencia']) ?></td>
+                        <td><?= htmlspecialchars($e['marca_modelo']) ?></td>
+                        <td><?= htmlspecialchars($e['serie']) ?></td>
+                        <td><span class="badge rounded-pill <?= ($e['tipo_color'] ?? '') === 'Color' ? 'bg-info text-dark' : 'bg-secondary' ?>"><?= ($e['tipo_color'] ?? '') === 'Color' ? 'COLOR' : 'B/N' ?></span></td>
+                        <td>
+                            <span class="badge bg-<?= $cls ?> <?= $cls === 'warning' ? 'text-dark' : '' ?>"><?= $e['estado'] ?></span>
+                            <?php if ($e['estado'] === 'Reportado'): ?><span class="text-muted">(<?= htmlspecialchars($e['origen']) ?>)</span><?php endif; ?>
+                        </td>
+                        <td class="text-end"><?= $bn !== null ? number_format($bn) : '—' ?></td>
+                        <td class="text-end"><?= ($col !== null && $col > 0) ? number_format($col) : '—' ?></td>
+                        <td><?= $e['ultima_fecha'] ? date('d/m/Y H:i', strtotime($e['ultima_fecha'])) : 'Sin lecturas' ?></td>
+                        <?php if ($puede_gestionar): ?>
+                        <td>
+                            <a href="editar_equipo.php?serie=<?= urlencode($e['serie']) ?>&empresa_id=<?= $empresa_id ?>" class="btn btn-warning btn-sm" title="Editar">✏️</a>
+                            <a href="../../backend/crud/delete_equipo.php?serie=<?= urlencode($e['serie']) ?>&empresa_id=<?= $empresa_id ?>"
+                               class="btn btn-danger btn-sm" onclick="return confirm('¿Seguro que quieres borrar este equipo?')" title="Eliminar">🗑️</a>
+                        </td>
                         <?php endif; ?>
-
-                        <a href="../../backend/crud/create.php?empresa_id=<?= $empresa_id ?>&serie=<?= urlencode($m['serie']) ?>" class="text-decoration-none text-center">
-                            <div class="card shadow-sm custom-card-btn p-3 <?= $clase_status ?>">
-                                <div class="card-body d-flex flex-column align-items-center">
-                                    <img src="../assets/images/lectura.png" class="card-icon" 
-                                         style="<?= $esta_listo ? 'filter: grayscale(100%) sepia(100%) hue-rotate(70deg) saturate(3);' : '' ?>">
-                                    
-                                    <h6 class="fw-bold <?= $texto_status ?> mb-1"><?= strtoupper(htmlspecialchars($m['dependencia'])) ?></h6>
-                                    <small class="text-dark d-block"><?= htmlspecialchars($m['marca_modelo']) ?></small>
-                                    
-                                    <div class="mt-2">
-                                        <?php if ($tipo_impresion === 'Color'): ?>
-                                            <span class="badge rounded-pill bg-info text-dark" style="font-size: 0.65rem;">COLOR</span>
-                                        <?php else: ?>
-                                            <span class="badge rounded-pill bg-secondary" style="font-size: 0.65rem;">B/N</span>
-                                        <?php endif; ?>
-                                    </div>
-
-                                    <?php if($esta_listo): ?>
-                                        <span class="badge bg-success mt-2">✓ COMPLETADO</span>
-                                    <?php else: ?>
-                                        <span class="badge bg-dark mt-2">S/N: <?= htmlspecialchars($m['serie']) ?></span>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            <?php endwhile; ?>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
         </div>
-    <?php else: ?>
-        <div class="empty-state-wrapper">
-            <div class="card p-5 shadow-sm text-center border-0" style="border-radius: 20px; max-width: 500px;">
+        <?php else: ?>
+            <div class="card-body text-center py-5">
                 <h5 class="fw-bold">No hay equipos registrados</h5>
                 <p class="text-muted">Registre la primera máquina para comenzar.</p>
-                <?php if ($rol_usuario === 'admin' || $rol_usuario === 'supervisor'): ?>
+                <?php if ($puede_gestionar): ?>
                     <a href="nuevo_equipo.php?empresa_id=<?= $empresa_id ?>" class="btn btn-danger shadow px-4">Registrar Máquina</a>
                 <?php endif; ?>
             </div>
-        </div>
-    <?php endif; ?>
-
-    <div class="text-center mb-3">
-        <h5 class="fw-bold text-secondary">HISTORIAL DE REGISTROS</h5>
+        <?php endif; ?>
     </div>
-    
-    <div class="table-card shadow border-0">
-        <div class="card-body p-0">
-            <?php include "../../backend/crud/list.php"; ?>
+    <p class="text-muted small">
+        <span class="dot dot-success"></span> Reportado: lectura recibida en el periodo ·
+        <span class="dot dot-warning"></span> Estimado: cifra del motor predictivo autorizada ·
+        <span class="dot dot-danger"></span> Pendiente: aún sin lectura.
+    </p>
+
+    <div class="card panel shadow border-0">
+        <div class="card-header bg-white fw-bold">Últimas lecturas recibidas</div>
+        <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle mb-0 small text-center">
+                <thead class="table-light">
+                    <tr><th>Fecha / Hora</th><th>Dependencia</th><th>Equipo</th><th>Serie</th>
+                        <th class="text-end">Contador B/N</th><th class="text-end">Contador Color</th><th>Tóner</th><th>Origen</th></tr>
+                </thead>
+                <tbody>
+                <?php while ($h = $historial->fetch_assoc()): ?>
+                    <tr>
+                        <td><?= date('d/m/Y H:i', strtotime($h['fecha'])) ?></td>
+                        <td><?= htmlspecialchars($h['dependencia']) ?></td>
+                        <td><?= htmlspecialchars($h['marca_modelo']) ?></td>
+                        <td><?= htmlspecialchars($h['serie']) ?></td>
+                        <td class="text-end"><?= number_format($h['contador_bn']) ?></td>
+                        <td class="text-end"><?= $h['contador_color'] > 0 ? number_format($h['contador_color']) : '—' ?></td>
+                        <td><?= $h['toner_pct'] !== null ? (int)$h['toner_pct'] . '%' : '—' ?></td>
+                        <td><span class="badge bg-light text-dark border"><?= htmlspecialchars($h['origen']) ?></span></td>
+                    </tr>
+                <?php endwhile; ?>
+                <?php if ($historial->num_rows === 0): ?>
+                    <tr><td colspan="8" class="text-muted py-4">Todavía no se han recibido lecturas de este cliente.</td></tr>
+                <?php endif; ?>
+                </tbody>
+            </table>
         </div>
     </div>
 
 </main>
 
-<footer class="text-white text-center py-3 mt-auto" style="background-color: #0A2540;">
-    <small>© 2026 ICV - Gestión Técnica Profesional</small>
-</footer>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
-<script>
-    particlesJS("particles-js", {
-        particles: {
-            number: { value: 50 },
-            color: { value: "#0A2540" },
-            opacity: { value: 0.2 },
-            size: { value: 3 },
-            line_linked: { enable: true, distance: 150, color: "#0A2540", opacity: 0.2, width: 1 },
-            move: { enable: true, speed: 2 }
-        }
-    });
-</script>
 </body>
 </html>

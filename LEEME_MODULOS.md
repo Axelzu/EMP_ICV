@@ -35,9 +35,9 @@ Probar el receptor SMTP: `node enviar_correo_prueba.js KM-A1001 120500 31200 55`
 | Documento | Implementación |
 |---|---|
 | RF-01 Inventario | `equipos` (+estado, qr_token), `frontend/pages/nuevo_equipo.php` |
-| RF-02 Lecturas / CU-02 | `servicios/smtp_listener.js`, `parser_reporte.js`, validación en `backend/crud/store.php` y `backend/lib/lecturas.php` |
+| RF-02 Lecturas / CU-02 | `servicios/smtp_listener.js`, `parser_reporte.js`, la validación (contador no menor al anterior) se aplica en el receptor SMTP. El formulario manual fue retirado |
 | RF-03 QR / CU-03 | `frontend/pages/escanear.php`, `backend/mantenimiento/confirmar.php`, `qr_equipos.php`, `mantenimiento.php` |
-| RF-04 Informe / CU-09 | `backend/reports/consolidado.php` |
+| RF-04 Informe / CU-09 | `backend/reports/consolidado.php` (descarga directa desde la web, botón en `empresa.php` y `dashboard.php`) |
 | RF-05 Semáforo / CU-07 | `frontend/pages/dashboard.php`, `servicios/scheduler.js` |
 | RF-06 Predicción / CU-04..06 | `servicios/ml.js`, `servicios/motor_predictivo.js`, `frontend/pages/tendencia.php` |
 | CU-08 Inyectar cifra | `backend/admin/aplicar_proyeccion.php` |

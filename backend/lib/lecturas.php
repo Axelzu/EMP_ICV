@@ -4,36 +4,6 @@
  * Estados de un equipo en un periodo (YYYY-MM): Reportado (lectura real), Estimado (proyección aplicada), Pendiente.
  */
 
-function equipoPorSerie($conn, $serie) {
-    $st = $conn->prepare("SELECT * FROM equipos WHERE serie = ? LIMIT 1");
-    $st->bind_param("s", $serie);
-    $st->execute();
-    return $st->get_result()->fetch_assoc();
-}
-
-/** Última lectura real (SMTP o manual) del equipo, o null si no tiene. */
-function ultimaLecturaReal($conn, $equipo_id, $excluir_formulario_id = 0) {
-    $st = $conn->prepare("SELECT contador_bn, contador_color, fecha FROM lecturas
-                          WHERE equipo_id = ? AND origen <> 'ESTIMADO' AND (formulario_id IS NULL OR formulario_id <> ?)
-                          ORDER BY fecha DESC, id DESC LIMIT 1");
-    $st->bind_param("ii", $equipo_id, $excluir_formulario_id);
-    $st->execute();
-    return $st->get_result()->fetch_assoc() ?: null;
-}
-
-/** RF-02: un contador no puede ser menor al último registrado. Devuelve null si es válido o un mensaje de error. */
-function validarContadorCronologico($conn, $equipo_id, $bn, $color, $excluir_formulario_id = 0) {
-    $u = ultimaLecturaReal($conn, $equipo_id, $excluir_formulario_id);
-    if (!$u) return null;
-    if ($bn < (int)$u['contador_bn']) {
-        return "El contador B/N ($bn) es menor al último registrado (" . (int)$u['contador_bn'] . ").";
-    }
-    if ($color < (int)$u['contador_color']) {
-        return "El contador Color ($color) es menor al último registrado (" . (int)$u['contador_color'] . ").";
-    }
-    return null;
-}
-
 /**
  * Estado de todos los equipos para un periodo.
  * Devuelve filas con: id, serie, dependencia, marca_modelo, empresa, estado, ultima_fecha, origen, proyección (si existe).

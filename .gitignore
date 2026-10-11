@@ -2,3 +2,6 @@ backend/config/db.local.php
 servicios/.env
 servicios/node_modules/
 exports/
+servicios/correos/
+backend/storage/*
+!backend/storage/.htaccess

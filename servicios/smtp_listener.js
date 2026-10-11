@@ -1,9 +1,13 @@
 // Receptor SMTP (RF-02 / CU-02 / HU-02): las impresoras envían su reporte programado por correo; este servicio
 // lo recibe, identifica el equipo por su número de serie y guarda el contador en `lecturas` sin intervención humana.
+const fs = require('fs');
+const path = require('path');
 const { SMTPServer } = require('smtp-server');
 const { simpleParser } = require('mailparser');
 const { pool } = require('./db');
 const { parsearReporte } = require('./parser_reporte');
+
+const DIR_CORREOS = path.join(__dirname, 'correos');
 
 async function registrarLectura(rep) {
   const [eq] = await pool.query('SELECT id FROM equipos WHERE serie = ? LIMIT 1', [rep.serie]);
@@ -31,42 +35,74 @@ async function registrarLectura(rep) {
   return { ok: true, equipoId };
 }
 
+// Texto del correo + adjuntos de texto (muchas impresoras envían el reporte como .txt / .csv adjunto)
+function textoCompleto(mail) {
+  const partes = [mail.subject || '', mail.text || ''];
+  for (const a of mail.attachments || []) {
+    const tipo = (a.contentType || '').toLowerCase();
+    const nombre = (a.filename || '').toLowerCase();
+    if (tipo.startsWith('text/') || /\.(txt|csv|log|xml)$/.test(nombre)) partes.push(a.content.toString('utf8'));
+  }
+  return partes.join('\n');
+}
+
 function crearServidor() {
   const usuario = process.env.SMTP_USUARIO || 'impresoras';
   const clave = process.env.SMTP_CLAVE || 'icv-smtp-2026';
+  // Algunas impresoras no soportan autenticación. Con SMTP_AUTH_REQUERIDA=false se aceptan sin usuario/clave
+  // (usar solo en una red controlada o con el puerto restringido por firewall a la IP de la impresora).
+  const authRequerida = (process.env.SMTP_AUTH_REQUERIDA || 'true').toLowerCase() !== 'false';
+  const guardar = (process.env.GUARDAR_CORREOS || 'true').toLowerCase() !== 'false';
+  if (guardar) fs.mkdirSync(DIR_CORREOS, { recursive: true });
 
   return new SMTPServer({
     name: 'icv-smtp',
-    authOptional: false,
+    authOptional: !authRequerida,
     disabledCommands: ['STARTTLS'],   // en producción: poner certificado TLS y habilitarlo
     allowInsecureAuth: true,
+    size: 10 * 1024 * 1024,
     onAuth(auth, session, cb) {
       if (auth.username === usuario && auth.password === clave) return cb(null, { user: usuario });
       return cb(new Error('Credenciales SMTP inválidas'));
     },
-    async onData(stream, session, cb) {
-      try {
-        const mail = await simpleParser(stream);
-        const texto = `${mail.subject || ''}\n${mail.text || ''}`;
-        const rep = parsearReporte(texto);
-        if (!rep) {
-          console.warn('[SMTP] Correo ignorado: no se encontró serie/contador en el cuerpo');
-          return cb(); // se acepta el correo para que el equipo no reintente, pero no se registra
+    onConnect(session, cb) {
+      console.log(`[SMTP] Conexión desde ${session.remoteAddress}`);
+      cb();
+    },
+    onData(stream, session, cb) {
+      const trozos = [];
+      stream.on('data', t => trozos.push(t));
+      stream.on('end', async () => {
+        const crudo = Buffer.concat(trozos);
+        try {
+          if (guardar) {
+            const nombre = new Date().toISOString().replace(/[:.]/g, '-') + '_' + session.remoteAddress.replace(/[^\w.-]/g, '') + '.eml';
+            fs.writeFileSync(path.join(DIR_CORREOS, nombre), crudo);
+          }
+          const mail = await simpleParser(crudo);
+          const rep = parsearReporte(textoCompleto(mail));
+          if (!rep) {
+            console.warn(`[SMTP] Correo de ${mail.from?.text || session.remoteAddress} recibido pero sin serie/contador reconocibles` +
+                         (guardar ? ' (copia guardada en servicios/correos/ para ajustar el parser)' : ''));
+            return cb(); // se acepta para que el equipo no reintente
+          }
+          const r = await registrarLectura(rep);
+          console.log(`[SMTP] ${rep.serie}: ${r.ok ? 'lectura guardada' : 'rechazada - ' + r.motivo}`);
+          cb();
+        } catch (err) {
+          console.error('[SMTP] Error procesando correo:', err.message);
+          cb(err);
         }
-        const r = await registrarLectura(rep);
-        console.log(`[SMTP] ${rep.serie}: ${r.ok ? 'lectura guardada' : 'rechazada - ' + r.motivo}`);
-        cb();
-      } catch (err) {
-        console.error('[SMTP] Error procesando correo:', err.message);
-        cb(err);
-      }
+      });
     }
   });
 }
 
 if (require.main === module) {
   const puerto = parseInt(process.env.SMTP_PORT || '2525', 10);
-  crearServidor().listen(puerto, () => console.log(`[SMTP] Escuchando en el puerto ${puerto}`));
+  const servidor = crearServidor();
+  servidor.on('error', e => console.error('[SMTP] Error del servidor:', e.message));
+  servidor.listen(puerto, '0.0.0.0', () => console.log(`[SMTP] Escuchando en el puerto ${puerto} (todas las interfaces)`));
 }
 
 module.exports = { crearServidor, registrarLectura };

@@ -20,3 +20,14 @@ test('devuelve null si no hay número de serie', () => {
 test('devuelve null si no hay contador', () => {
   assert.strictEqual(parsearReporte('Serial Number: AB-1234'), null);
 });
+
+test('interpreta un reporte CSV con comas (adjunto)', () => {
+  const r = parsearReporte('Serial Number,KM-G7007\nTotal Black,116700\nTotal Color,0\nToner Level,70%');
+  assert.strictEqual(r.serie, 'KM-G7007');
+  assert.strictEqual(r.contador_bn, 116700);
+  assert.strictEqual(r.toner_pct, 70);
+});
+
+test('no toma la palabra "Number" como serie', () => {
+  assert.strictEqual(parsearReporte('Serial Number: \nTotal Black: 100'), null);
+});

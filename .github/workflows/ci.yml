@@ -12,6 +12,8 @@ jobs:
           php-version: '8.2'
       - name: Análisis estático PHP (sintaxis)
         run: find backend frontend index.php -name '*.php' -print0 | xargs -0 -n1 php -l
+      - name: Pruebas unitarias PHP (parser, lector de correo y motor predictivo)
+        run: php backend/tests/run.php
       - uses: actions/setup-node@v4
         with:
           node-version: '20'

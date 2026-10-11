@@ -70,11 +70,18 @@ $semaforo = ['Reportado' => 'success', 'Estimado' => 'warning', 'Pendiente' => '
                 <?php endwhile; ?>
             </select>
             <button class="btn btn-primary btn-sm">Filtrar</button>
+            <button type="submit" form="form-recalcular" class="btn btn-outline-primary btn-sm"
+                    onclick="return confirm('¿Recalcular las proyecciones de todos los equipos?')">
+                <i class="bi bi-arrow-repeat"></i> Recalcular proyecciones</button>
             <a class="btn btn-success btn-sm"
                href="../../backend/reports/consolidado.php?periodo=<?= urlencode($periodo) ?>&empresa_id=<?= $empresa_id ?>">
                 <i class="bi bi-file-earmark-excel"></i> Informe consolidado (Excel)</a>
         </form>
     </div>
+
+    <form id="form-recalcular" method="POST" action="../../backend/admin/recalcular.php" class="d-none">
+        <input type="hidden" name="csrf_token" value="<?= $token ?>">
+    </form>
 
     <div class="row g-3 mb-4">
         <?php foreach ($cont as $est => $n): ?>

@@ -2,11 +2,11 @@
 // Cada marca usa etiquetas distintas; se aceptan las variantes más comunes (ES/EN). Devuelve null si no hay serie.
 
 const ETIQUETAS = {
-  serie: /(?:serial(?:\s*(?:number|no\.?))?|n[uú]mero\s+de\s+serie|serie|s\/n)\s*[:=#]?\s*([A-Za-z0-9\-_.]{4,})/i,
-  bn:    /(?:total\s*(?:b\s*\/?\s*n|bw|black(?:\s*(?:&|and)\s*white)?|mono(?:chrome)?)|black(?:\s*(?:&|and)\s*white)?(?:\s*(?:pages|count|total))?|b\/n|blanco\s*y\s*negro|mono(?:chrome)?(?:\s*count)?)\s*[:=]?\s*([\d.,]+)/i,
-  color: /(?:total\s*colou?r|colou?r(?:\s*(?:pages|count|total))?)\s*[:=]?\s*([\d.,]+)/i,
-  total: /(?:total\s*(?:pages|count|impresiones|copias)?|contador\s*total)\s*[:=]?\s*([\d.,]+)/i,
-  toner: /(?:toner|t[oó]ner)(?:\s*(?:level|nivel|black|negro))?\s*[:=]?\s*(\d{1,3})\s*%/i,
+  serie: /(?:serial(?:\s*(?:number|no\.?))?|n[uú]mero\s+de\s+serie|serie|s\/n)\s*[:=#,;\t]?\s*((?=[A-Za-z0-9\-_.]*\d)[A-Za-z0-9\-_.]{4,})/i,
+  bn:    /(?:total\s*(?:b\s*\/?\s*n|bw|black(?:\s*(?:&|and)\s*white)?|mono(?:chrome)?)|black(?:\s*(?:&|and)\s*white)?(?:\s*(?:pages|count|total))?|b\/n|blanco\s*y\s*negro|mono(?:chrome)?(?:\s*count)?)\s*[:=,;\t]?\s*(\d[\d.,]*)/i,
+  color: /(?:total\s*colou?r|colou?r(?:\s*(?:pages|count|total))?)\s*[:=,;\t]?\s*(\d[\d.,]*)/i,
+  total: /(?:total\s*(?:pages|count|impresiones|copias)?|contador\s*total)\s*[:=,;\t]?\s*(\d[\d.,]*)/i,
+  toner: /(?:toner|t[oó]ner)(?:\s*(?:level|nivel|black|negro))?\s*[:=,;\t]?\s*(\d{1,3})\s*%/i,
   fecha: /(?:date|fecha)\s*[:=]?\s*(\d{4}-\d{2}-\d{2}(?:[ T]\d{2}:\d{2}(?::\d{2})?)?)/i
 };
 

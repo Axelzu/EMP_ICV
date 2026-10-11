@@ -1,0 +1,2 @@
+# Los scripts ejecutados por cPanel (shebang) deben conservar saltos de línea LF
+backend/cron/*.php text eol=lf

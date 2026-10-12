@@ -17,6 +17,7 @@ if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
 require __DIR__ . '/../lib/mime.php';
 require __DIR__ . '/../lib/parser_reporte.php';
 require __DIR__ . '/../lib/ingesta.php';
+require __DIR__ . '/../lib/aviso_equipo.php';
 
 $cfg = require __DIR__ . '/../config/ingesta.php';
 $dirStorage = __DIR__ . '/../storage';
@@ -44,8 +45,10 @@ try {
         if (!$permitido) { ingesta_log($dirStorage, 'Remitente no permitido: ' . $mail['remitente']); exit(0); }
     }
 
+    // 1) Reporte de contadores (serie + contador)   2) Aviso de alerta del equipo (MAC / host, sin contadores)
     $rep = parsearReporte($mail['asunto'] . "\n" . $mail['texto']);
-    if (!$rep) {
+    $aviso = $rep ? null : parsearAvisoEquipo($mail['asunto'], $mail['texto']);
+    if (!$rep && !$aviso) {
         ingesta_log($dirStorage, 'Sin serie/contador reconocibles. Remitente: ' . $mail['remitente'] . ' | Asunto: ' . $mail['asunto']);
         exit(0);
     }
@@ -58,8 +61,17 @@ try {
         exit(75);
     }
 
-    $r = registrarLecturaSmtp($conn, $rep);
-    ingesta_log($dirStorage, $rep['serie'] . ': ' . ($r['ok'] ? 'lectura guardada' : 'rechazada - ' . $r['motivo']));
+    if ($rep) {
+        $r = registrarLecturaSmtp($conn, $rep);
+        ingesta_log($dirStorage, $rep['serie'] . ': ' . ($r['ok'] ? 'lectura guardada' : 'rechazada - ' . $r['motivo']));
+    } else {
+        $r = registrarAvisoEquipo($conn, $aviso);
+        $quien = $aviso['mac'] ?: $aviso['hostname'];
+        if (!$r['ok'])                   ingesta_log($dirStorage, "Aviso de $quien rechazado - " . $r['motivo']);
+        elseif (!empty($r['duplicado'])) ingesta_log($dirStorage, "Aviso de $quien repetido (ignorado): " . $aviso['resumen']);
+        else                             ingesta_log($dirStorage, "Aviso de $quien guardado [" . $aviso['categoria'] . ']: ' . $aviso['resumen']
+                                                          . (!empty($r['ticket']) ? ' (ticket de mantenimiento creado)' : ''));
+    }
 } catch (Throwable $e) {
     ingesta_log($dirStorage, 'Error: ' . $e->getMessage());
 }

@@ -45,6 +45,11 @@ $empresa = $stmt->get_result()->fetch_assoc();
                     <input type="text" name="serie" class="form-control" required>
                 </div>
                 <div class="mb-3">
+                    <label class="form-label fw-bold">Dirección MAC <span class="text-muted fw-normal">(opcional)</span></label>
+                    <input type="text" name="mac" class="form-control" placeholder="00:26:73:96:44:10" maxlength="17">
+                    <small class="text-muted">Sirve para reconocer los avisos automáticos de la impresora (tóner, papel, tapa). La encuentra en el correo de aviso o en la página de la impresora.</small>
+                </div>
+                <div class="mb-3">
                     <label class="form-label fw-bold" style="color: #0A2540;">Tipo de Impresión</label>
                     <select name="tipo_color" class="form-select" style="border: 1px solid #00bcd4; border-radius: 8px;" required>
                         <option value="" selected disabled>Seleccione una opción...</option>

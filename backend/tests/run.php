@@ -57,5 +57,22 @@ $p = motor_proyectar(lineales(4, 10000, 3000), '2025-05');
 prueba('menos de 6 meses => preliminar', $p && $p['preliminar'] === true);
 prueba('sin historial suficiente no proyecta', motor_proyectar(lineales(1, 10000, 3000), '2025-03') === null);
 
+echo "Avisos de equipo (correos reales de una Ricoh MP C2503)\n";
+require_once __DIR__ . '/../lib/aviso_equipo.php';
+$m = mime_parsear(file_get_contents(__DIR__ . '/fixtures/ricoh_tapa.eml'));
+prueba('asunto decodificado (ISO-8859-1)', strpos($m['asunto'], 'Notificación alertas dispositivo') !== false);
+$a = parsearAvisoEquipo($m['asunto'], $m['texto']);
+prueba('reconoce el aviso', $a !== null);
+prueba('lee la MAC del equipo', $a && $a['mac'] === '00:26:73:96:44:10');
+prueba('lee el nombre de host', $a && $a['hostname'] === 'RNP002673964410');
+prueba('evento principal y categoría (tapa)', $a && $a['resumen'] === 'Cerrar tapa frontal' && $a['categoria'] === 'TAPA');
+prueba('detalle sin líneas repetidas', $a && substr_count($a['detalle'], 'No hay papel: Bandeja 4') === 1);
+prueba('un reporte de contadores no es un aviso', $a !== null && parsearReporte($m['asunto'] . "\n" . $m['texto']) === null);
+$m2 = mime_parsear(file_get_contents(__DIR__ . '/fixtures/ricoh_toner.eml'));
+$b = parsearAvisoEquipo($m2['asunto'], $m2['texto']);
+prueba('aviso de tóner => categoría TONER', $b && $b['categoria'] === 'TONER');
+prueba('texto cualquiera no es aviso', parsearAvisoEquipo('hola', 'nada que ver') === null);
+prueba('normaliza una MAC', normalizarMac('00-26-73-96-44-10') === '00:26:73:96:44:10' && normalizarMac('xyz') === null);
+
 echo "\n$total pruebas, $fallos fallas\n";
 exit($fallos ? 1 : 0);

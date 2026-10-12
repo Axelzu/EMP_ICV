@@ -23,6 +23,11 @@ $cont = ['Reportado' => 0, 'Estimado' => 0, 'Pendiente' => 0];
 foreach ($equipos as $e) $cont[$e['estado']]++;
 
 $notifs = $conn->query("SELECT id, tipo, mensaje, creada_en FROM notificaciones WHERE leida = 0 ORDER BY id DESC LIMIT 8");
+$alertas_eq = $conn->query("SELECT a.categoria, a.resumen, a.detalle, a.recibido_en, e.dependencia, e.marca_modelo, e.serie, emp.nombre AS empresa
+                            FROM alertas_equipo a JOIN equipos e ON e.id = a.equipo_id JOIN empresas emp ON emp.id = e.empresa_id
+                            WHERE a.leida = 0 ORDER BY a.recibido_en DESC, a.id DESC LIMIT 15")->fetch_all(MYSQLI_ASSOC);
+$estilo_alerta = ['TONER' => ['warning text-dark', 'Tóner'], 'PAPEL' => ['info text-dark', 'Papel'],
+                  'TAPA' => ['secondary', 'Tapa'], 'OTRO' => ['dark', 'Otro']];
 $tickets_pend = (int)$conn->query("SELECT COUNT(*) n FROM tickets_mantenimiento WHERE estado = 'Pendiente'")->fetch_assoc()['n'];
 $token = generarTokenCSRF();
 
@@ -93,6 +98,29 @@ $semaforo = ['Reportado' => 'success', 'Estimado' => 'warning', 'Pendiente' => '
             </div>
         <?php endforeach; ?>
     </div>
+
+    <?php if ($alertas_eq): ?>
+    <div class="card shadow-sm mb-4 border-0" style="border-radius:15px">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <strong><i class="bi bi-printer-fill text-primary"></i> Avisos de las impresoras sin leer</strong>
+            <form method="POST" action="../../backend/admin/marcar_notificaciones.php" class="m-0">
+                <input type="hidden" name="csrf_token" value="<?= $token ?>">
+                <input type="hidden" name="volver" value="dashboard.php?periodo=<?= htmlspecialchars($periodo) ?>&empresa_id=<?= $empresa_id ?>">
+                <button class="btn btn-outline-secondary btn-sm">Marcar como leídos</button>
+            </form>
+        </div>
+        <ul class="list-group list-group-flush small">
+            <?php foreach ($alertas_eq as $a): ?>
+                <li class="list-group-item" title="<?= htmlspecialchars($a['detalle'] ?? '') ?>">
+                    <span class="badge bg-<?= $estilo_alerta[$a['categoria']][0] ?? 'dark' ?> me-2"><?= htmlspecialchars($estilo_alerta[$a['categoria']][1] ?? $a['categoria']) ?></span>
+                    <strong><?= htmlspecialchars($a['resumen']) ?></strong>
+                    · <?= htmlspecialchars($a['empresa']) ?> · <?= htmlspecialchars($a['dependencia']) ?> (<?= htmlspecialchars($a['marca_modelo']) ?>, <?= htmlspecialchars($a['serie']) ?>)
+                    <span class="text-muted">· <?= date('d/m/Y H:i', strtotime($a['recibido_en'])) ?></span>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    </div>
+    <?php endif; ?>
 
     <?php if ($notifs->num_rows > 0): ?>
     <div class="card shadow-sm mb-4 border-0" style="border-radius:15px">

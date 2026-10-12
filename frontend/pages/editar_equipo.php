@@ -80,6 +80,13 @@ if (!$equipo) {
                 </div>
                 
                 <div class="mb-3">
+                    <label class="form-label fw-bold">Dirección MAC <span class="text-muted fw-normal">(opcional)</span></label>
+                    <input type="text" name="mac" class="form-control" placeholder="00:26:73:96:44:10" maxlength="17"
+                           value="<?= htmlspecialchars($equipo['mac'] ?? '') ?>">
+                    <small class="text-muted">Sirve para reconocer los avisos automáticos de la impresora.</small>
+                </div>
+
+                <div class="mb-3">
                     <label class="form-label fw-bold">Tipo de Impresión</label>
                     <select name="tipo_color" class="form-select" style="border: 1px solid #00bcd4;" required>
                         <option value="Blanco y Negro" <?= ($equipo['tipo_color'] == 'Blanco y Negro') ? 'selected' : '' ?>> Blanco y Negro</option>

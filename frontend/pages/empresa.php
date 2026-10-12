@@ -33,6 +33,21 @@ $stmt = $conn->prepare("SELECT l.fecha, l.contador_bn, l.contador_color, l.toner
 $stmt->bind_param("i", $empresa_id);
 $stmt->execute();
 $historial = $stmt->get_result();
+
+// 5. Alertas automáticas de las impresoras (tóner, papel, tapa) de los últimos 7 días
+$stmt = $conn->prepare("SELECT a.id, a.equipo_id, a.categoria, a.resumen, a.detalle, a.recibido_en, e.dependencia, e.marca_modelo, e.serie
+                        FROM alertas_equipo a JOIN equipos e ON e.id = a.equipo_id
+                        WHERE e.empresa_id = ? AND a.recibido_en > (NOW() - INTERVAL 7 DAY)
+                        ORDER BY a.recibido_en DESC, a.id DESC LIMIT 40");
+$stmt->bind_param("i", $empresa_id);
+$stmt->execute();
+$alertas = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$alertas_por_equipo = [];
+foreach ($alertas as $a) {
+    $alertas_por_equipo[$a['equipo_id']][$a['categoria']] = ($alertas_por_equipo[$a['equipo_id']][$a['categoria']] ?? 0) + 1;
+}
+$estilo_alerta = ['TONER' => ['warning text-dark', 'Tóner'], 'PAPEL' => ['info text-dark', 'Papel'],
+                  'TAPA' => ['secondary', 'Tapa'], 'OTRO' => ['dark', 'Otro']];
 ?>
 
 <!DOCTYPE html>
@@ -101,6 +116,13 @@ $historial = $stmt->get_result();
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         <?php endif; ?>
+        <?php if (isset($_GET['error']) && in_array($_GET['error'], ['mac_invalida', 'mac_duplicada'], true)): ?>
+            <div class="alert alert-danger alert-dismissible fade show shadow-sm text-center mx-auto" role="alert" style="max-width: 600px; border-radius: 12px;">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <?= $_GET['error'] === 'mac_invalida' ? 'La dirección MAC no es válida (ejemplo: 00:26:73:96:44:10).' : 'Esa dirección MAC ya pertenece a otro equipo.' ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <?php endif; ?>
         <?php if (isset($_GET['msg']) && $_GET['msg'] === 'equipo_creado'): ?>
             <div class="alert alert-success alert-dismissible fade show shadow-sm text-center mx-auto" role="alert" style="max-width: 600px; border-radius: 12px;">
                 <i class="bi bi-check-circle-fill me-2"></i> Equipo registrado correctamente.
@@ -118,6 +140,7 @@ $historial = $stmt->get_result();
                     <tr>
                         <th></th><th>Dependencia</th><th>Marca / Modelo</th><th>Serie</th><th>Tipo</th><th>Estado</th>
                         <th class="text-end">Contador B/N</th><th class="text-end">Contador Color</th><th>Última lectura</th>
+                        <th>Alertas (7 días)</th>
                         <?php if ($puede_gestionar): ?><th>Acciones</th><?php endif; ?>
                     </tr>
                 </thead>
@@ -140,6 +163,11 @@ $historial = $stmt->get_result();
                         <td class="text-end"><?= $bn !== null ? number_format($bn) : '—' ?></td>
                         <td class="text-end"><?= ($col !== null && $col > 0) ? number_format($col) : '—' ?></td>
                         <td><?= $e['ultima_fecha'] ? date('d/m/Y H:i', strtotime($e['ultima_fecha'])) : 'Sin lecturas' ?></td>
+                        <td>
+                            <?php if (!empty($alertas_por_equipo[$e['id']])): foreach ($alertas_por_equipo[$e['id']] as $cat => $n): ?>
+                                <span class="badge bg-<?= $estilo_alerta[$cat][0] ?? 'dark' ?>"><?= htmlspecialchars($estilo_alerta[$cat][1] ?? $cat) ?> <?= $n ?></span>
+                            <?php endforeach; else: ?><span class="text-muted">—</span><?php endif; ?>
+                        </td>
                         <?php if ($puede_gestionar): ?>
                         <td>
                             <a href="editar_equipo.php?serie=<?= urlencode($e['serie']) ?>&empresa_id=<?= $empresa_id ?>" class="btn btn-warning btn-sm" title="Editar">✏️</a>
@@ -167,6 +195,31 @@ $historial = $stmt->get_result();
         <span class="dot dot-warning"></span> Estimado: cifra del motor predictivo autorizada ·
         <span class="dot dot-danger"></span> Pendiente: aún sin lectura.
     </p>
+
+    <div class="card panel shadow border-0 mb-4">
+        <div class="card-header bg-white fw-bold"><i class="bi bi-bell-fill text-warning"></i> Alertas recientes de las impresoras</div>
+        <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle mb-0 small">
+                <thead class="table-light">
+                    <tr><th>Fecha / Hora</th><th>Dependencia</th><th>Equipo</th><th>Tipo</th><th>Evento</th></tr>
+                </thead>
+                <tbody>
+                <?php foreach ($alertas as $a): ?>
+                    <tr>
+                        <td class="text-nowrap"><?= date('d/m/Y H:i', strtotime($a['recibido_en'])) ?></td>
+                        <td><?= htmlspecialchars($a['dependencia']) ?></td>
+                        <td><?= htmlspecialchars($a['marca_modelo']) ?> <span class="text-muted">(<?= htmlspecialchars($a['serie']) ?>)</span></td>
+                        <td><span class="badge bg-<?= $estilo_alerta[$a['categoria']][0] ?? 'dark' ?>"><?= htmlspecialchars($estilo_alerta[$a['categoria']][1] ?? $a['categoria']) ?></span></td>
+                        <td title="<?= htmlspecialchars($a['detalle'] ?? '') ?>"><?= htmlspecialchars($a['resumen']) ?></td>
+                    </tr>
+                <?php endforeach; ?>
+                <?php if (!$alertas): ?>
+                    <tr><td colspan="5" class="text-muted text-center py-3">Sin alertas en los últimos 7 días.</td></tr>
+                <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
     <div class="card panel shadow border-0">
         <div class="card-header bg-white fw-bold">Últimas lecturas recibidas</div>

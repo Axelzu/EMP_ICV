@@ -16,9 +16,11 @@ function parsearReporte($texto) {
     if (!$texto) return null;
 
     $et = [
-        'serie' => '/(?:serial(?:\s*(?:number|no\.?))?|n[uú]mero\s+de\s+serie|serie|s\/n)\s*[:=#,;\t]?\s*((?=[A-Za-z0-9\-_.]*\d)[A-Za-z0-9\-_.]{4,})/iu',
-        'bn'    => '/(?:total\s*(?:b\s*\/?\s*n|bw|black(?:\s*(?:&|and)\s*white)?|mono(?:chrome)?)|black(?:\s*(?:&|and)\s*white)?(?:\s*(?:pages|count|total))?|b\/n|blanco\s*y\s*negro|mono(?:chrome)?(?:\s*count)?)\s*[:=,;\t]?\s*(\d[\d.,]*)/iu',
-        'color' => '/(?:total\s*colou?r|colou?r(?:\s*(?:pages|count|total))?)\s*[:=,;\t]?\s*(\d[\d.,]*)/iu',
+        'serie' => '/(?:serial(?:\s*(?:number|no\.?))?|n[uú]mero\s+de\s+serie|serie|s\/n|id\s*m[aá]quina|machine\s*id)\s*[:=#,;\t]?\s*((?=[A-Za-z0-9\-_.]*\d)[A-Za-z0-9\-_.]{4,})/iu',
+        'bn'    => '/(?:total[\s_]*(?:b\s*\/?\s*n|bw|black(?:\s*(?:&|and)\s*white)?|mono(?:chrome)?)|black(?:\s*(?:&|and)\s*white)?(?:\s*(?:pages|count|total))?|b\/n|blanco\s*y\s*negro|mono(?:chrome)?(?:\s*count)?)\s*[:=,;\t]?\s*(\d[\d.,]*)/iu',
+        'color' => '/(?:total[\s_]*colou?r|colou?r(?:\s*(?:pages|count|total))?)\s*[:=,;\t]?\s*(\d[\d.,]*)/iu',
+        // Ricoh (respuesta a requeststatus): "Contador total: 796594". Se prefiere a un "total" cualquiera (p. ej. "Memoria total: 1536MB")
+        'contador_total' => '/contador\s*total\s*[:=,;\t]?\s*(\d[\d.,]*)/iu',
         'total' => '/(?:total\s*(?:pages|count|impresiones|copias)?|contador\s*total)\s*[:=,;\t]?\s*(\d[\d.,]*)/iu',
         'toner' => '/(?:toner|t[oó]ner)(?:\s*(?:level|nivel|black|negro))?\s*[:=,;\t]?\s*(\d{1,3})\s*%/iu',
         'fecha' => '/(?:date|fecha)\s*[:=]?\s*(\d{4}-\d{2}-\d{2}(?:[ T]\d{2}:\d{2}(?::\d{2})?)?)/iu',
@@ -32,7 +34,7 @@ function parsearReporte($texto) {
 
     $bn = parser_entero($m('bn'));
     $color = parser_entero($m('color'));
-    $total = parser_entero($m('total'));
+    $total = parser_entero($m('contador_total')) ?? parser_entero($m('total'));
     if ($bn === null && $total !== null) $bn = $total - ($color ?? 0);
     if ($bn === null) return null;
 

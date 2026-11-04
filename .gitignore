@@ -5,3 +5,5 @@ exports/
 servicios/correos/
 backend/storage/*
 !backend/storage/.htaccess
+colector/config.php
+backend/config/colector.local.php

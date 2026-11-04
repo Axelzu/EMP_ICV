@@ -45,12 +45,26 @@ falta de papel, tapa abierta. Esos correos **no traen número de serie ni contad
 - La impresora debe presentarse con un nombre de dominio completo para que el antispam del servidor acepte el correo:
   en la impresora, Red > IPv4 > Nombre del dominio = `icv.com.ec`.
 
+## Colector de contadores (Ricoh que no reportan contadores por correo)
+
+La Ricoh MP C2503 solo envía avisos de estado por correo. Sus contadores se leen de la página pública de Web Image Monitor
+(`/web/guest/en/websys/status/getUnificationCounter.cgi`, sin login) desde la red local del cliente:
+
+1. En un computador de esa red (siempre encendido, o el del técnico en la visita) tener PHP y copiar el proyecto o la carpeta `colector/` con `backend/lib/ricoh_contador.php`.
+2. Copiar `colector/config.example.php` a `colector/config.php` y completar la URL del sistema, el token y las IP de las impresoras.
+3. En el servidor, copiar `backend/config/colector.example.php` a `backend/config/colector.local.php` con el **mismo token** (mínimo 16 caracteres). Sin ese archivo el endpoint `backend/api/lectura.php` queda desactivado.
+4. Ejecutar `php colector/colector_ricoh.php` y programarlo en el Programador de tareas de Windows (diario o al cierre de mes).
+
+Cada impresora se identifica por su "Machine ID" (el número de serie), que debe estar registrado en el equipo. B/N = copiadora + impresora;
+color = todos los modos de color. Las lecturas quedan con origen `COLECTOR`. El tráfico es solo saliente (HTTPS) hacia el sistema.
+
 ## Base de datos
 
 Ejecutar en phpMyAdmin, en este orden y una sola vez cada uno (MySQL 8 / MariaDB, aditivos e idempotentes). Respaldar antes:
 
 1. `database/migracion_v2.sql`
 2. `database/migracion_v3.sql` (MAC del equipo y tabla `alertas_equipo`)
+3. `database/migracion_v4.sql` (origen `COLECTOR` en las lecturas)
 
 ## Desarrollo local
 

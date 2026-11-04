@@ -4,8 +4,11 @@
  * Reglas: el equipo debe estar registrado (por número de serie) y el contador no puede ser menor al último real.
  */
 
-/** @return array{ok:bool, motivo?:string, equipo_id?:int} */
-function registrarLecturaSmtp($conn, $rep) {
+/**
+ * $origen: 'SMTP' para lecturas por correo, 'COLECTOR' para las que envía el colector de contadores.
+ * @return array{ok:bool, motivo?:string, equipo_id?:int}
+ */
+function registrarLecturaSmtp($conn, $rep, $origen = 'SMTP') {
     $st = $conn->prepare("SELECT id FROM equipos WHERE serie = ? LIMIT 1");
     $st->bind_param("s", $rep['serie']);
     $st->execute();
@@ -20,7 +23,7 @@ function registrarLecturaSmtp($conn, $rep) {
     $st->execute();
     $ult = $st->get_result()->fetch_assoc();
     if ($ult && ($rep['contador_bn'] < (int)$ult['contador_bn'] || $rep['contador_color'] < (int)$ult['contador_color'])) {
-        $msg = "Lectura SMTP inconsistente en serie {$rep['serie']}: {$rep['contador_bn']} B/N es menor al último registrado ({$ult['contador_bn']}).";
+        $msg = "Lectura $origen inconsistente en serie {$rep['serie']}: {$rep['contador_bn']} B/N es menor al último registrado ({$ult['contador_bn']}).";
         $n = $conn->prepare("INSERT INTO notificaciones (tipo, mensaje, equipo_id) VALUES ('INCONSISTENCIA', ?, ?)");
         $n->bind_param("si", $msg, $equipoId);
         $n->execute();
@@ -30,8 +33,8 @@ function registrarLecturaSmtp($conn, $rep) {
     $fecha = $rep['fecha'] ?: date('Y-m-d H:i:s');
     $toner = $rep['toner_pct'];
     $ins = $conn->prepare("INSERT INTO lecturas (equipo_id, fecha, contador_bn, contador_color, toner_pct, origen)
-                           VALUES (?, ?, ?, ?, ?, 'SMTP')");
-    $ins->bind_param("isiii", $equipoId, $fecha, $rep['contador_bn'], $rep['contador_color'], $toner);
+                           VALUES (?, ?, ?, ?, ?, ?)");
+    $ins->bind_param("isiiis", $equipoId, $fecha, $rep['contador_bn'], $rep['contador_color'], $toner, $origen);
     $ins->execute();
     return ['ok' => true, 'equipo_id' => $equipoId];
 }

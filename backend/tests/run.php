@@ -74,5 +74,33 @@ prueba('aviso de tóner => categoría TONER', $b && $b['categoria'] === 'TONER')
 prueba('texto cualquiera no es aviso', parsearAvisoEquipo('hola', 'nada que ver') === null);
 prueba('normaliza una MAC', normalizarMac('00-26-73-96-44-10') === '00:26:73:96:44:10' && normalizarMac('xyz') === null);
 
+echo "Contadores de la Ricoh MP C2503 (páginas reales de Web Image Monitor)\n";
+require_once __DIR__ . '/../lib/ricoh_contador.php';
+$c = ricoh_parsear_contadores(file_get_contents(__DIR__ . '/fixtures/ricoh_contador.html'));
+prueba('lee el total de la máquina', $c && $c['total'] === 796590);
+prueba('B/N = copiadora + impresora', $c && $c['contador_bn'] === 30291 + 418586);
+prueba('color = todos los modos de color', $c && $c['contador_color'] === 67357 + 277671 + 6 + 2679);
+prueba('B/N + color coincide con el total', $c && $c['consistente'] === true);
+$q = ricoh_parsear_equipo(file_get_contents(__DIR__ . '/fixtures/ricoh_equipo.html'));
+prueba('lee el número de serie (Machine ID)', $q && $q['serie'] === 'E214MB60667' && $q['modelo'] === 'MP C2503');
+prueba('una página cualquiera no es de contadores', ricoh_parsear_contadores('<html><body>404 Not Found</body></html>') === null);
+
+echo "Respuesta de la Ricoh a requeststatus (Información estado dispositivo)\n";
+$m = mime_parsear(file_get_contents(__DIR__ . '/fixtures/ricoh_estado.eml'));
+$r = parsearReporte($m['asunto'] . "\n" . $m['texto']);
+prueba('asunto con acentos (UTF-8 en base64)', strpos($m['asunto'], 'Información estado dispositivo') === 0);
+prueba('lee "ID máquina" como número de serie', $r && $r['serie'] === 'E214MB60667');
+prueba('lee "Contador total" y no "Memoria total"', $r && $r['contador_bn'] === 796594);
+prueba('sin desglose, el color queda en cero', $r && $r['contador_color'] === 0);
+prueba('no se confunde con un aviso de alertas', parsearAvisoEquipo($m['asunto'], $m['texto']) === null);
+
+echo "Correo mensual de contadores de la Ricoh (SP 5-866, correo real de la MP C2503)\n";
+$m = mime_parsear(file_get_contents(__DIR__ . '/fixtures/ricoh_contadores_sp.eml'));
+$r = parsearReporte($m['asunto'] . "\n" . $m['texto']);
+prueba('lee "Serial No." como número de serie', $r && $r['serie'] === 'E214MB60667');
+prueba('lee Total_BW (blanco y negro)', $r && $r['contador_bn'] === 448884);
+prueba('lee Total_Color', $r && $r['contador_color'] === 347718);
+prueba('no se confunde con un aviso de alertas', parsearAvisoEquipo($m['asunto'], $m['texto']) === null);
+
 echo "\n$total pruebas, $fallos fallas\n";
 exit($fallos ? 1 : 0);

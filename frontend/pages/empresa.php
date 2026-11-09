@@ -104,15 +104,60 @@ $estilo_alerta = ['TONER' => ['warning text-dark', 'Tóner'], 'PAPEL' => ['info 
                    href="../../backend/reports/consolidado.php?periodo=<?= urlencode($periodo) ?>&empresa_id=<?= $empresa_id ?>">
                     <i class="bi bi-file-earmark-excel"></i> Descargar Excel
                 </a>
+                <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="collapse" data-bs-target="#filtrosInforme">
+                    <i class="bi bi-funnel"></i> Informe con filtros
+                </button>
             <?php endif; ?>
         </form>
     </div>
+
+    <?php if ($puede_gestionar): $departamentos = array_values(array_unique(array_column($equipos, 'dependencia'))); sort($departamentos); ?>
+    <div class="collapse mb-4" id="filtrosInforme">
+        <div class="card panel shadow border-0">
+            <div class="card-body">
+                <h6 class="fw-bold mb-1"><i class="bi bi-funnel"></i> Informe de consumo con filtros</h6>
+                <p class="text-muted small mb-3">Elija un departamento y/o un rango de fechas. Con rango se usan solo lecturas reales; sin rango se genera el informe del mes seleccionado arriba.</p>
+                <form method="GET" action="../../backend/reports/consolidado.php" class="row g-2 align-items-end">
+                    <input type="hidden" name="empresa_id" value="<?= $empresa_id ?>">
+                    <input type="hidden" name="periodo" value="<?= htmlspecialchars($periodo) ?>">
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold mb-1">Departamento</label>
+                        <select name="departamento" class="form-select form-select-sm">
+                            <option value="">Todos los departamentos</option>
+                            <?php foreach ($departamentos as $d): ?>
+                                <option value="<?= htmlspecialchars($d) ?>"><?= htmlspecialchars($d) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold mb-1">Desde</label>
+                        <input type="date" name="desde" class="form-control form-control-sm">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold mb-1">Hasta</label>
+                        <input type="date" name="hasta" class="form-control form-control-sm">
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-success btn-sm w-100"><i class="bi bi-file-earmark-excel"></i> Descargar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
 
     <div class="container mb-3">
         <?php if (isset($_GET['error']) && $_GET['error'] === 'serie_duplicada'): ?>
             <div class="alert alert-danger alert-dismissible fade show shadow-sm text-center mx-auto" role="alert" style="max-width: 600px; border-radius: 12px;">
                 <i class="bi bi-exclamation-triangle-fill me-2"></i>
                 <strong>¡Atención!</strong> El número de serie que intentas registrar ya existe.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <?php endif; ?>
+        <?php if (isset($_GET['error']) && in_array($_GET['error'], ['estado_invalido', 'parametros_invalidos'], true)): ?>
+            <div class="alert alert-danger alert-dismissible fade show shadow-sm text-center mx-auto" role="alert" style="max-width: 600px; border-radius: 12px;">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <?= $_GET['error'] === 'estado_invalido' ? 'El estado operativo no es válido.' : 'El umbral de mantenimiento y el rendimiento del tóner deben ser números enteros positivos.' ?>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         <?php endif; ?>
@@ -141,7 +186,7 @@ $estilo_alerta = ['TONER' => ['warning text-dark', 'Tóner'], 'PAPEL' => ['info 
                         <th></th><th>Dependencia</th><th>Marca / Modelo</th><th>Serie</th><th>Tipo</th><th>Estado</th>
                         <th class="text-end">Contador B/N</th><th class="text-end">Contador Color</th><th>Última lectura</th>
                         <th>Alertas (7 días)</th>
-                        <?php if ($puede_gestionar): ?><th>Acciones</th><?php endif; ?>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -168,13 +213,14 @@ $estilo_alerta = ['TONER' => ['warning text-dark', 'Tóner'], 'PAPEL' => ['info 
                                 <span class="badge bg-<?= $estilo_alerta[$cat][0] ?? 'dark' ?>"><?= htmlspecialchars($estilo_alerta[$cat][1] ?? $cat) ?> <?= $n ?></span>
                             <?php endforeach; else: ?><span class="text-muted">—</span><?php endif; ?>
                         </td>
-                        <?php if ($puede_gestionar): ?>
-                        <td>
+                        <td class="text-nowrap">
+                            <a href="ficha_equipo.php?serie=<?= urlencode($e['serie']) ?>&empresa_id=<?= $empresa_id ?>" class="btn btn-outline-primary btn-sm" title="Ficha técnica"><i class="bi bi-card-list"></i></a>
+                            <?php if ($puede_gestionar): ?>
                             <a href="editar_equipo.php?serie=<?= urlencode($e['serie']) ?>&empresa_id=<?= $empresa_id ?>" class="btn btn-warning btn-sm" title="Editar">✏️</a>
                             <a href="../../backend/crud/delete_equipo.php?serie=<?= urlencode($e['serie']) ?>&empresa_id=<?= $empresa_id ?>"
                                class="btn btn-danger btn-sm" onclick="return confirm('¿Seguro que quieres borrar este equipo?')" title="Eliminar">🗑️</a>
+                            <?php endif; ?>
                         </td>
-                        <?php endif; ?>
                     </tr>
                 <?php endforeach; ?>
                 </tbody>

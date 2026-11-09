@@ -45,6 +45,18 @@ falta de papel, tapa abierta. Esos correos **no traen número de serie ni contad
 - La impresora debe presentarse con un nombre de dominio completo para que el antispam del servidor acepte el correo:
   en la impresora, Red > IPv4 > Nombre del dominio = `icv.com.ec`.
 
+## Informe con filtros y ficha del equipo (RF-04 y RF-01)
+
+- **Informe de consumo** (`backend/reports/consolidado.php`): en la página del cliente, botón **Informe con filtros**. Admite
+  **departamento** (dependencia) y un **rango de fechas** (desde / hasta, máximo un año). Con rango se usan solo lecturas reales:
+  cierre = última lectura dentro del rango, apertura = última lectura anterior. Sin rango se genera el informe mensual de siempre
+  (con las cifras estimadas autorizadas en amarillo). El tiempo de generación queda en la auditoría.
+- **Estado operativo** (Operativo, En mantenimiento, Fuera de servicio): se cambia en **Editar equipo**. Un equipo «Fuera de servicio»
+  deja de aparecer en el semáforo y en los informes. En la misma pantalla se ajustan el umbral de mantenimiento y el rendimiento del tóner.
+- **Ficha técnica** (`frontend/pages/ficha_equipo.php`, botón de la columna Acciones, visible para todos los roles): datos del equipo,
+  identificador único, MAC, QR, última lectura, proyección vigente, historial de mantenimientos, alertas y lecturas.
+- No requieren migración nueva: usan columnas de `migracion_v2.sql`.
+
 ## Colector de contadores (Ricoh que no reportan contadores por correo)
 
 La Ricoh MP C2503 solo envía avisos de estado por correo. Sus contadores se leen de la página pública de Web Image Monitor

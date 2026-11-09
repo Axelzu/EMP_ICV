@@ -87,6 +87,30 @@ if (!$equipo) {
                 </div>
 
                 <div class="mb-3">
+                    <label class="form-label fw-bold">Estado operativo</label>
+                    <select name="estado" class="form-select" required>
+                        <?php foreach (['Operativo', 'En mantenimiento', 'Fuera de servicio'] as $est): ?>
+                            <option value="<?= $est ?>" <?= ($equipo['estado'] ?? 'Operativo') === $est ? 'selected' : '' ?>><?= $est ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <small class="text-muted">Un equipo «Fuera de servicio» deja de aparecer en el semáforo y en los informes.</small>
+                </div>
+
+                <div class="row g-2 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Umbral de mantenimiento <span class="text-muted fw-normal">(páginas)</span></label>
+                        <input type="number" name="umbral_mantenimiento" class="form-control" min="1" step="1"
+                               value="<?= (int)($equipo['umbral_mantenimiento'] ?? 100000) ?>" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Rendimiento del tóner <span class="text-muted fw-normal">(páginas)</span></label>
+                        <input type="number" name="rendimiento_toner" class="form-control" min="1" step="1"
+                               value="<?= (int)($equipo['rendimiento_toner'] ?? 20000) ?>" required>
+                    </div>
+                    <small class="text-muted">Los usa el motor predictivo para agendar el mantenimiento y estimar el desgaste del tóner.</small>
+                </div>
+
+                <div class="mb-3">
                     <label class="form-label fw-bold">Tipo de Impresión</label>
                     <select name="tipo_color" class="form-select" style="border: 1px solid #00bcd4;" required>
                         <option value="Blanco y Negro" <?= ($equipo['tipo_color'] == 'Blanco y Negro') ? 'selected' : '' ?>> Blanco y Negro</option>

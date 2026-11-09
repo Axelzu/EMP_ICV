@@ -102,5 +102,13 @@ prueba('lee Total_BW (blanco y negro)', $r && $r['contador_bn'] === 448884);
 prueba('lee Total_Color', $r && $r['contador_color'] === 347718);
 prueba('no se confunde con un aviso de alertas', parsearAvisoEquipo($m['asunto'], $m['texto']) === null);
 
+echo "Validación de fechas del informe (RF-04)\n";
+require_once __DIR__ . '/../lib/lecturas.php';
+prueba('acepta una fecha válida', fechaValida('2026-10-31') === true);
+prueba('rechaza un día inexistente', fechaValida('2026-02-30') === false);
+prueba('rechaza un formato distinto', fechaValida('31/10/2026') === false && fechaValida('') === false);
+prueba('acepta un año bisiesto', fechaValida('2028-02-29') === true && fechaValida('2027-02-29') === false);
+prueba('periodo mensual válido', periodoValido('2026-11') === true && periodoValido('2026-13') === false);
+
 echo "\n$total pruebas, $fallos fallas\n";
 exit($fallos ? 1 : 0);

@@ -30,9 +30,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    // Estado operativo y parámetros del motor predictivo (RF-01)
+    $estado = $_POST['estado'] ?? 'Operativo';
+    if (!in_array($estado, ['Operativo', 'En mantenimiento', 'Fuera de servicio'], true)) {
+        header("Location: ../../frontend/pages/empresa.php?empresa_id=$emp_id&error=estado_invalido");
+        exit;
+    }
+    $umbral = filter_var($_POST['umbral_mantenimiento'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+    $rend   = filter_var($_POST['rendimiento_toner'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+    if ($umbral === false || $rend === false) {
+        header("Location: ../../frontend/pages/empresa.php?empresa_id=$emp_id&error=parametros_invalidos");
+        exit;
+    }
+
     // 2. Actualizamos los datos del equipo donde la serie coincida con la original
     $sql = "UPDATE equipos
-            SET dependencia = ?, marca_modelo = ?, serie = ?, tipo_color = ?, mac = ?
+            SET dependencia = ?, marca_modelo = ?, serie = ?, tipo_color = ?, mac = ?, estado = ?, umbral_mantenimiento = ?, rendimiento_toner = ?
             WHERE serie = ? AND empresa_id = ?";
 
     $stmt = $conn->prepare($sql);
@@ -41,8 +54,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         die("Error en la preparación de la base de datos: " . $conn->error);
     }
 
-    // "ssssssi" -> 6 Strings (dep, mod, ser_nueva, tipo, mac, ser_old) y 1 Entero (emp_id)
-    $stmt->bind_param("ssssssi", $dep, $mod, $ser_nueva, $tipo, $mac, $ser_old, $emp_id);
+    // 6 strings (dep, mod, ser_nueva, tipo, mac, estado), 2 enteros (umbral, rendimiento), 1 string (ser_old) y 1 entero (emp_id)
+    $stmt->bind_param("ssssssiisi", $dep, $mod, $ser_nueva, $tipo, $mac, $estado, $umbral, $rend, $ser_old, $emp_id);
 
     if ($stmt->execute()) {
         // Si todo sale bien, regresamos a la página de la empresa con mensaje de éxito

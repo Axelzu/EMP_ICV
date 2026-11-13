@@ -8,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $dep    = $_POST['dependencia'];
     $mod    = $_POST['marca_modelo'];
     $ser    = $_POST['serie'];
-    $tipo   = $_POST['tipo_color'];
+    // El tipo (B/N o color) ya no se pide: se deduce de los contadores que reporta el equipo.
 
     // MAC opcional: se usa para reconocer los avisos automáticos de la impresora
     $mac_txt = trim($_POST['mac'] ?? '');
@@ -44,14 +44,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // 2. SI NO EXISTE: Procedemos con el INSERT
     // qr_token: identificador único que se imprime en el código QR pegado al equipo (RF-03)
-    $sql = "INSERT INTO equipos (empresa_id, dependencia, marca_modelo, serie, tipo_color, mac, qr_token) VALUES (?, ?, ?, ?, ?, ?, MD5(CONCAT(?, RAND(), NOW())))";
+    $sql = "INSERT INTO equipos (empresa_id, dependencia, marca_modelo, serie, mac, qr_token) VALUES (?, ?, ?, ?, ?, MD5(CONCAT(?, RAND(), NOW())))";
     $stmt = $conn->prepare($sql);
 
     if (!$stmt) {
         die("Error en la preparación: " . $conn->error);
     }
 
-    $stmt->bind_param("issssss", $emp_id, $dep, $mod, $ser, $tipo, $mac, $ser);
+    $stmt->bind_param("isssss", $emp_id, $dep, $mod, $ser, $mac, $ser);
 
     if ($stmt->execute()) {
         header("Location: ../../frontend/pages/empresa.php?empresa_id=$emp_id&msg=equipo_creado");

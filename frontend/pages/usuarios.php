@@ -145,6 +145,18 @@ $usuarios = $conn->query("SELECT id, nombre, email, rol, activo FROM users ORDER
                                             </button>
                                         </form>
                                     </li>
+                                    <?php if ((int)$user['id'] !== (int)$_SESSION['user_id']): ?>
+                                    <li>
+                                        <form method="POST" action="../../backend/admin/eliminar_usuario.php" class="m-0"
+                                              onsubmit="return confirm('¿Eliminar definitivamente la cuenta de <?= htmlspecialchars($user['email'], ENT_QUOTES) ?>?\n\nEsta acción no se puede deshacer. Si solo desea impedir su acceso, use «Desactivar cuenta».')">
+                                            <input type="hidden" name="csrf_token" value="<?= $csrf ?>">
+                                            <input type="hidden" name="id" value="<?= $user['id'] ?>">
+                                            <button class="dropdown-item text-danger fw-bold">
+                                                <i class="bi bi-trash3"></i> Eliminar cuenta
+                                            </button>
+                                        </form>
+                                    </li>
+                                    <?php endif; ?>
                                 </ul>
                             </div>
                         </td>

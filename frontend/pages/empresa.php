@@ -200,7 +200,8 @@ $estilo_alerta = ['TONER' => ['warning text-dark', 'Tóner'], 'PAPEL' => ['info 
                         <td class="fw-bold"><?= htmlspecialchars($e['dependencia']) ?></td>
                         <td><?= htmlspecialchars($e['marca_modelo']) ?></td>
                         <td><?= htmlspecialchars($e['serie']) ?></td>
-                        <td><span class="badge rounded-pill <?= ($e['tipo_color'] ?? '') === 'Color' ? 'bg-info text-dark' : 'bg-secondary' ?>"><?= ($e['tipo_color'] ?? '') === 'Color' ? 'COLOR' : 'B/N' ?></span></td>
+                        <?php $esColor = ($e['tipo_color'] ?? '') === 'Color' || (int)($e['real_color'] ?? 0) > 0 || (int)($e['contador_color_estimado'] ?? 0) > 0; // el tipo se deduce de los contadores ?>
+                        <td><span class="badge rounded-pill <?= $esColor ? 'bg-info text-dark' : 'bg-secondary' ?>"><?= $esColor ? 'COLOR' : 'B/N' ?></span></td>
                         <td>
                             <span class="badge bg-<?= $cls ?> <?= $cls === 'warning' ? 'text-dark' : '' ?>"><?= $e['estado'] ?></span>
                             <?php if ($e['estado'] === 'Reportado'): ?><span class="text-muted">(<?= htmlspecialchars($e['origen']) ?>)</span><?php endif; ?>

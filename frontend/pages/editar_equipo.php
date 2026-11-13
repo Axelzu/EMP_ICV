@@ -110,14 +110,6 @@ if (!$equipo) {
                     <small class="text-muted">Los usa el motor predictivo para agendar el mantenimiento y estimar el desgaste del tóner.</small>
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Tipo de Impresión</label>
-                    <select name="tipo_color" class="form-select" style="border: 1px solid #00bcd4;" required>
-                        <option value="Blanco y Negro" <?= ($equipo['tipo_color'] == 'Blanco y Negro') ? 'selected' : '' ?>> Blanco y Negro</option>
-                        <option value="Color" <?= ($equipo['tipo_color'] == 'Color') ? 'selected' : '' ?>> Color</option>
-                    </select>
-                </div>
-
                 <div class="d-flex justify-content-between mt-4">
                     <a href="empresa.php?empresa_id=<?= $empresa_id ?>" class="btn btn-secondary px-4">Cancelar</a>
                     <button type="submit" class="btn btn-warning fw-bold shadow-sm px-4">Actualizar Datos</button>

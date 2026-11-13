@@ -10,7 +10,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $mod       = $_POST['marca_modelo'];
     $ser_nueva = $_POST['serie']; // La serie que el usuario pudo haber editado
     $ser_old   = $_POST['serie_original']; // Necesitamos la serie anterior para el WHERE
-    $tipo      = $_POST['tipo_color'];
 
     // MAC opcional (vacía = sin MAC)
     $mac_txt = trim($_POST['mac'] ?? '');
@@ -45,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // 2. Actualizamos los datos del equipo donde la serie coincida con la original
     $sql = "UPDATE equipos
-            SET dependencia = ?, marca_modelo = ?, serie = ?, tipo_color = ?, mac = ?, estado = ?, umbral_mantenimiento = ?, rendimiento_toner = ?
+            SET dependencia = ?, marca_modelo = ?, serie = ?, mac = ?, estado = ?, umbral_mantenimiento = ?, rendimiento_toner = ?
             WHERE serie = ? AND empresa_id = ?";
 
     $stmt = $conn->prepare($sql);
@@ -54,8 +53,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         die("Error en la preparación de la base de datos: " . $conn->error);
     }
 
-    // 6 strings (dep, mod, ser_nueva, tipo, mac, estado), 2 enteros (umbral, rendimiento), 1 string (ser_old) y 1 entero (emp_id)
-    $stmt->bind_param("ssssssiisi", $dep, $mod, $ser_nueva, $tipo, $mac, $estado, $umbral, $rend, $ser_old, $emp_id);
+    // 5 strings (dep, mod, ser_nueva, mac, estado), 2 enteros (umbral, rendimiento), 1 string (ser_old) y 1 entero (emp_id)
+    $stmt->bind_param("sssssiisi", $dep, $mod, $ser_nueva, $mac, $estado, $umbral, $rend, $ser_old, $emp_id);
 
     if ($stmt->execute()) {
         // Si todo sale bien, regresamos a la página de la empresa con mensaje de éxito

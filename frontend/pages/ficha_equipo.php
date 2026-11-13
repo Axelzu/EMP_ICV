@@ -92,7 +92,7 @@ $u = $lecturas[0] ?? null;
                     <dt class="col-sm-4">Dependencia</dt><dd class="col-sm-8"><?= htmlspecialchars($eq['dependencia']) ?></dd>
                     <dt class="col-sm-4">Marca y modelo</dt><dd class="col-sm-8"><?= htmlspecialchars($eq['marca_modelo']) ?></dd>
                     <dt class="col-sm-4">Número de serie</dt><dd class="col-sm-8"><?= htmlspecialchars($eq['serie']) ?></dd>
-                    <dt class="col-sm-4">Tipo de impresión</dt><dd class="col-sm-8"><?= htmlspecialchars($eq['tipo_color'] ?? '—') ?></dd>
+                    <dt class="col-sm-4">Tipo de impresión</dt><dd class="col-sm-8"><?php $esColor = ($eq['tipo_color'] ?? '') === 'Color' || (bool)array_filter($lecturas, fn($l) => (int)$l['contador_color'] > 0); echo $esColor ? 'Color' : 'Blanco y Negro'; ?></dd>
                     <dt class="col-sm-4">Dirección MAC</dt><dd class="col-sm-8"><?= htmlspecialchars($eq['mac'] ?: '—') ?></dd>
                     <dt class="col-sm-4">Nombre de host</dt><dd class="col-sm-8"><?= htmlspecialchars($eq['hostname'] ?: '—') ?></dd>
                     <dt class="col-sm-4">Umbral de mantenimiento</dt><dd class="col-sm-8"><?= number_format((int)$eq['umbral_mantenimiento']) ?> páginas</dd>

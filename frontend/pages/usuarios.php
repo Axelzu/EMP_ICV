@@ -169,5 +169,11 @@ $usuarios = $conn->query("SELECT id, nombre, email, rol, activo FROM users ORDER
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// El menú «Gestionar» queda recortado dentro de la tabla (table-responsive). Con posición fija se muestra completo.
+document.querySelectorAll('[data-bs-toggle="dropdown"]').forEach(function (el) {
+    new bootstrap.Dropdown(el, { popperConfig: function (def) { return Object.assign({}, def, { strategy: 'fixed' }); } });
+});
+</script>
 </body>
 </html>
